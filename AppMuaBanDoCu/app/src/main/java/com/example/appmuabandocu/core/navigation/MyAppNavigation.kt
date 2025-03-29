@@ -9,6 +9,7 @@ import com.example.appmuabandocu.core.ui.SplashRoleScreen
 import com.example.appmuabandocu.core.ui.SplashScreen
 import com.example.appmuabandocu.feature_auth.ui.LoginScreen
 import com.example.appmuabandocu.feature_auth.ui.RegisterMainScreen
+import com.example.appmuabandocu.feature_home.ui.HomeScreen
 
 @Composable
 fun MyAppNavigation(modifier: Modifier = Modifier) {
@@ -23,5 +24,9 @@ fun MyAppNavigation(modifier: Modifier = Modifier) {
         composable("login_screen"){ LoginScreen(modifier, navController) }
         composable("register_main_screen"){ RegisterMainScreen(modifier, navController) }
 
+
+
+
+        composable("home_screen"){ HomeScreen(modifier) }
     }
 }
