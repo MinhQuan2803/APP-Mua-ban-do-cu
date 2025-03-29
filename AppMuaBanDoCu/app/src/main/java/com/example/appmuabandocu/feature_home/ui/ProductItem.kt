@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.feature_home.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,12 +32,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.ui.theme.Blue_text
+import com.example.appmuabandocu.R
 
 @Preview(showBackground = true)
 @Composable
@@ -77,12 +80,9 @@ fun ProductItem(
             modifier = Modifier.padding(vertical = 8.dp)
         )
         Column(modifier = Modifier.padding(12.dp)) {
-
-            // Header: Avatar + User + Location
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Avatar tạm dùng icon
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
+                Image(
+                    painter = painterResource(id = R.drawable.huynguyen),
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
@@ -93,6 +93,7 @@ fun ProductItem(
 
                 Column {
                     Text(text = userName, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row {
                         Text(text = time, fontSize = 12.sp, color = Color.Gray)
                         Spacer(modifier = Modifier.width(4.dp))

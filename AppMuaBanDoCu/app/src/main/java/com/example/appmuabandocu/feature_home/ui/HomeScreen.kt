@@ -159,6 +159,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun CategoryItem(title: String, iconRes: Int,) {
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally) {
         IconButton(
