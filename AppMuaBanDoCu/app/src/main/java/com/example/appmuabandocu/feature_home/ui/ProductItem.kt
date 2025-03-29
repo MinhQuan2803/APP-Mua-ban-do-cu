@@ -2,6 +2,7 @@ package com.example.appmuabandocu.feature_home.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,7 +46,8 @@ fun myscreen(){
         location = "Thảo Điền - TP.HCM",
         productName = "Camera mẫu mới giá rẻ",
         price = "2.3tr",
-        imageUrl = "https://picsum.photos/seed/picsum/200/300"
+        imageUrl = "https://picsum.photos/seed/picsum/200/300",
+        time = "1 h"
     )
 }
 
@@ -56,7 +59,8 @@ fun ProductItem(
     productName: String,
     price: String,
     imageUrl: String, // link ảnh từ internet
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    time: String
 ) {
     Card(
         modifier = modifier
@@ -89,8 +93,19 @@ fun ProductItem(
 
                 Column {
                     Text(text = userName, fontWeight = FontWeight.Bold)
-                    Text(text = location, fontSize = 12.sp, color = Color.Gray)
+                    Row {
+                        Text(text = time, fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = location, fontSize = 12.sp, color = Color.Gray)
+
+                    }
                 }
+                Spacer(modifier = Modifier.weight(1f)) // Spacer đẩy dấu ba chấm sang phải
+
+                Icon(
+                    imageVector = Icons.Default.MoreVert, // dấu ba chấm dọc
+                    contentDescription = "More"
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -127,19 +142,19 @@ fun ProductItem(
 //                Text(text = "Liên hệ ngay", color = Color.White)
 //            }
 
-//            TextButton(
-//                onClick = { /* TODO: Gọi số hoặc mở chat */ },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(45.dp),
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Phone,
-//                    contentDescription = null,
-//                    tint = Blue_text
-//                )
-//                Text(text = "Liên hệ ngay", color = Blue_text)
-//            }
+            TextButton(
+                onClick = { /* TODO: Gọi số hoặc mở chat */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(45.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = null,
+                    tint = Blue_text
+                )
+                Text(text = "Liên hệ ngay", color = Blue_text)
+            }
         }
     }
 }

@@ -116,9 +116,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 IconButton(
                     modifier = Modifier
                         .border(2.dp , Color.White, RoundedCornerShape(10.dp)),
-                    onClick = {
-                        // Xử lý khi nút được nhấn
-                    }
+                    onClick = { }
                 ){
                     Image(
                         Icons.Default.Search,
@@ -143,13 +141,14 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(10) { // giả sử có 10 bài đăng
+                items(10) {
                     ProductItem(
                         userName = "HuyNguyen",
                         location = "Thảo Điền - TP.HCM",
                         productName = "Camera mẫu mới giá rẻ",
                         price = "2.3tr",
-                        imageUrl = "https://picsum.photos/seed/picsum/200/300"
+                        imageUrl = "https://picsum.photos/seed/picsum/200/300",
+                        time = "1 h"
                     )
                 }
             }
