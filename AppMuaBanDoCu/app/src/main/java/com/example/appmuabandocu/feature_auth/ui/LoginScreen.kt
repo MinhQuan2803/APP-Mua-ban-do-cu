@@ -83,7 +83,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(context, "Google Login Successful!", Toast.LENGTH_SHORT).show()
-                        navController.navigate("home_screen")
+                        navController.navigate("homeNav")
                     } else {
                         Toast.makeText(context, "Google Login Failed!", Toast.LENGTH_SHORT).show()
                     }
@@ -147,8 +147,6 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                 )
                 TextButton(
 
-                    // test navigationbottom    
-
                     onClick = { navController.navigate("homeNav") },
                     modifier = Modifier.align(Alignment.End)
                 ) {
@@ -161,7 +159,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     Toast.makeText(context, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
-                                    navController.navigate("home_screen") // Điều hướng sau khi đăng nhập thành công
+                                    navController.navigate("homeNav") // Điều hướng sau khi đăng nhập thành công
                                 } else {
                                     Toast.makeText(context, "Đăng nhập thất bại!", Toast.LENGTH_SHORT).show()
                                 }

@@ -43,6 +43,7 @@ import com.example.appmuabandocu.feature_home.ui.HomeScreen
 import com.example.appmuabandocu.feature_productlist.ui.ProductListScreen
 import com.example.appmuabandocu.feature_profile.ui.ProfileScreen
 import com.example.appmuabandocu.ui.theme.Blue_text
+import com.google.firebase.auth.FirebaseAuth
 
 
 data class NavItem(val route: String, val icon: Int, val label: String)
@@ -112,19 +113,33 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
         },
         floatingActionButtonPosition = FabPosition.Center // FAB nằm giữa
     ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding),navController = navController, selectedIndex)
+        ContentScreen(modifier = Modifier.padding(innerPadding),navController = navController, selectedIndex, auth = FirebaseAuth.getInstance())
 
 
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier,navController: NavHostController, selectedIndex: Int) {
-    when(selectedIndex) {
+fun ContentScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    selectedIndex: Int,
+    auth: FirebaseAuth // Thêm auth vào tham số
+) {
+    when (selectedIndex) {
         0 -> HomeScreen(modifier = modifier, navController = navController)
         1 -> ProductListScreen()
         2 -> FavoriteScreen()
-        3 -> ProfileScreen()
+        3 -> ProfileScreen(
+            auth = auth,  // Truyền FirebaseAuth
+            onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
+            onSignOut = {
+                auth.signOut()  // Đăng xuất khỏi Firebase
+                navController.navigate("login_screen")  // Điều hướng về login
+            },
+            navController = navController
+        )
     }
 }
+
 

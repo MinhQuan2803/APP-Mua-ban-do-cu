@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -16,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
@@ -23,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
+import androidx.compose.ui.res.colorResource
+import com.example.appmuabandocu.ui.theme.Black
 
 @Composable
 fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController) {
@@ -51,7 +56,7 @@ fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController
                         contentDescription = "Logo",
                     )
                     Text(
-                        text = "Bạn có muốn ?",
+                        text = "Bạn muốn ?",
                         fontSize = 45.sp,
                         fontWeight = Bold,
                         color = Blue_text,
@@ -66,7 +71,7 @@ fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController
                     border = BorderStroke(1.dp, Blue_text),
 
                     shape = ButtonDefaults.outlinedShape,
-                    onClick = { navController.navigate("login_screen") }
+                    onClick = { }
 
                 ){
                     Text(text = "Mua đồ cũ", fontSize = 24.sp,
@@ -82,10 +87,24 @@ fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController
                     border = BorderStroke(1.dp, Blue_text),
 
                     shape = ButtonDefaults.outlinedShape,
-                    onClick = { navController.navigate("login_screen") }
+                    onClick = { }
 
                 ){
                     Text(text = "Bán đồ cũ", fontSize = 24.sp,
+                        fontWeight = Bold,
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.mauchinh),
+                        contentColor = Black
+                    ),
+                    border = BorderStroke(1.dp, Blue_text),
+                    shape = ButtonDefaults.outlinedShape,
+                    onClick = { navController.navigate("homeNav") }
+                ){
+                    Text(text = "Bắt đầu ngay", fontSize = 24.sp,
                         fontWeight = Bold,
                     )
                 }
