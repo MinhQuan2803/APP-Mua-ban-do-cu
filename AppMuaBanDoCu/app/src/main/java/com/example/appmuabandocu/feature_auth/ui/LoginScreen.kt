@@ -146,7 +146,10 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                     )
                 )
                 TextButton(
-                    onClick = { /* TODO: Thêm tính năng quên mật khẩu */ },
+
+                    // test navigationbottom    
+
+                    onClick = { navController.navigate("homeNav") },
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(text = "Quên mật khẩu", fontSize = 16.sp, color = Blue_text)
