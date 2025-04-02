@@ -33,13 +33,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 
 
-@Preview(showBackground = true)
+
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
     Box(
         modifier = modifier
             .fillMaxSize(),

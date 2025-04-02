@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "753588286088",
+    "project_id": "appmuabandocu",
+    "storage_bucket": "appmuabandocu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753588286088:android:0cfc54b24ef743ddc0e53d",
+        "android_client_info": {
+          "package_name": "com.example.appmuabandocu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLjPINbyHqsIrfRDl-eFHfiQMcJuTcyNU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
