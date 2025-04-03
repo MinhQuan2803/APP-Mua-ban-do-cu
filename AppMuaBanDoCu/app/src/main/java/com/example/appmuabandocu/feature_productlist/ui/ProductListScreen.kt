@@ -3,6 +3,7 @@ package com.example.appmuabandocu.feature_productlist.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,7 @@ import com.example.appmuabandocu.ui.theme.Blue_text
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.draw.clip
+import com.example.appmuabandocu.feature_home.ui.ProductItem
 
 
 @Preview(showBackground = true)
@@ -115,19 +117,18 @@ fun ProductListScreen(modifier: Modifier = Modifier) {
                     }
                 }
             }
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ){
-                val products = List(10) { "Camera" to "500.000 đ" }
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2), // ✅ Chia 2 cột
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    items(products) { (name, price) ->
-                        ProductItem(name, price)
-                    }
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(10) {
+                    ProductItem(
+                        userName = "HuyNguyen",
+                        location = "Thảo Điền - TP.HCM",
+                        productName = "Camera mẫu mới giá rẻ",
+                        price = "2.3tr",
+                        imageUrl = "https://picsum.photos/seed/picsum/200/300",
+                        time = "1 h"
+                    )
                 }
             }
 
@@ -135,51 +136,4 @@ fun ProductListScreen(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun ProductItem(name: String, price: String) {
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.pd_camera),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
-        Row {
-            Column {
-                Text(
-                    text = name,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Text(
-                    text = price,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = {},
-                shape = RoundedCornerShape(4.dp),
-                modifier = Modifier
-                    .padding(2.dp)
-                    .width(100.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Blue_text
-                )
-
-            ) {
-                Text("Liên hệ")
-            }
-        }
-
-    }
-}
 

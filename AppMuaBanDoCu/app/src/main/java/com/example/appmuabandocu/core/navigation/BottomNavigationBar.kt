@@ -63,8 +63,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
             NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(50.dp, 50.dp, 50.dp, 50.dp)),
+                    .height(100.dp),
 
                 tonalElevation = 20.dp,
                 containerColor = Color(0xFFFFFFFF),
@@ -88,10 +87,10 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
                         icon = { Icon(painterResource(id = item.icon),
                             modifier = Modifier.size(35.dp),
                             contentDescription = item.label) },
-//                        label = {
-//                            Text(text = item.label)
-//
-//                        }
+                        label = {
+                            Text(text = item.label)
+
+                        }
                     )
                 }
             }

@@ -7,10 +7,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +46,7 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 
 
+
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
     Box(
@@ -48,7 +55,8 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                    .matchParentSize(),
             painter = painterResource(id = R.drawable.bg2_screen),
             contentDescription = "Home Screen",
             contentScale = ContentScale.FillBounds // cat anh vua khung hinh
@@ -57,25 +65,15 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
         ){
-            Spacer(modifier = Modifier.height(30.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom,
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_app),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(80.dp)
-                )
+
                 Text(
                     text = "Thanh ly nhanh",
                     fontSize = 22.sp,
                     fontWeight = Bold,
                     color = Blue_text,
-                    modifier = Modifier.padding(bottom = 16.dp)
-
+                    modifier = Modifier.padding(10.dp)
+                        .fillMaxWidth()
                 )
-            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,34 +82,23 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .border(2.dp , Color.White, CircleShape),
-                    onClick = {
-                        // Xử lý khi nút được nhấn
-                    }
 
-                ){
-                    Image(
-                        painter = painterResource(id = R.drawable.huynguyen),
-                        contentDescription = "Profile",
-                    )
-                }
                 var SearchText = remember { mutableStateOf("") }
                 OutlinedTextField(
-                    value = "searchText",
+                    value = "",
                     onValueChange = {
                         SearchText.value = it
                     },
-                    placeholder = { Text("Bạn muốn mua gì ?") },
+                    placeholder = { Text("Bạn muốn mua gì ?", fontSize = 12.sp, modifier = Modifier.padding(0.dp)) },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
                         //focusedContainerColor = Color.White,
                         focusedIndicatorColor = Blue_text,
                         unfocusedIndicatorColor = Blue_text,
                         unfocusedContainerColor = Color.White,
-                    )
+                    ),
+                    modifier = Modifier.height(50.dp)
+                        .weight(1f)
 
                 )
                 Spacer(modifier = Modifier.width(10.dp))
@@ -128,32 +115,33 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
                 }
 
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CategoryItem("Thiết bị \n điện tử", R.drawable.device)
+                CategoryItem("Đồ điện tử", R.drawable.device)
                 CategoryItem("Xe máy", R.drawable.moto)
                 CategoryItem("Thời trang", R.drawable.apparel)
                 CategoryItem("Đồ gia dụng", R.drawable.chair)
                 CategoryItem("Khác", R.drawable.oder)
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(10) {
-                    ProductItem(
-                        userName = "HuyNguyen",
-                        location = "Thảo Điền - TP.HCM",
-                        productName = "Camera mẫu mới giá rẻ",
-                        price = "2.3tr",
-                        imageUrl = "https://picsum.photos/seed/picsum/200/300",
-                        time = "1 h"
-                    )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ){
+                val products = List(10) { "Camera" to "500.000 đ" }
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2), // ✅ Chia 2 cột
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    items(products) { (name, price) ->
+                        ProductItem(name, price)
+                    }
                 }
             }
+
         }
 
     }
@@ -171,7 +159,7 @@ fun CategoryItem(title: String, iconRes: Int,) {
                     width = 1.dp,
                     color = Color.Black,
 
-                )
+                    )
         ) {
             Icon(
                 painter = painterResource(id = iconRes),
@@ -184,5 +172,53 @@ fun CategoryItem(title: String, iconRes: Int,) {
         Text(title, fontSize = 10.sp,
             textAlign = TextAlign.Center,
         )
+    }
+}
+
+@Composable
+fun ProductItem(name: String, price: String) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.pd_camera),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+        Row {
+            Column {
+                Text(
+                    text = name,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Text(
+                    text = price,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(4.dp),
+                modifier = Modifier
+                    .padding(2.dp)
+                    .width(100.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Blue_text
+                )
+
+            ) {
+                Text("Liên hệ")
+            }
+        }
+
     }
 }
