@@ -101,7 +101,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
 
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate("add_product_screen") },
+                onClick = { navController.navigate("category_screen") },
                 containerColor = Color(0xFF2196F3),
                 shape = CircleShape,
                 modifier = Modifier

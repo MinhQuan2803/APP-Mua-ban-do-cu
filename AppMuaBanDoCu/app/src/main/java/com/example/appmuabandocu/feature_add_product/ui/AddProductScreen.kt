@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.feature_add_product.ui
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
@@ -48,17 +50,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.R
-
-@Preview(showBackground = true)
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 @Composable
-fun AddProductScreen(modifier: Modifier = Modifier) {
+fun AddProductScreen(modifier: Modifier = Modifier,category: String) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> imageUri = uri }
-
+    val context = LocalContext.current
     var productName by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var details by remember { mutableStateOf("") }
@@ -153,9 +154,10 @@ fun AddProductScreen(modifier: Modifier = Modifier) {
 
                 OutlinedTextField(
                     value = category,
-                    onValueChange = { category = it },
+                    onValueChange = { },
                     label = { Text("Loại mặt hàng") },
                     singleLine = true,
+                    readOnly = true,
                     modifier = Modifier.fillMaxWidth().padding(8.dp)
                 )
 
@@ -222,7 +224,9 @@ fun AddProductScreen(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { Toast.makeText(null, "Đăng sản phẩm!", Toast.LENGTH_SHORT).show() },
+            onClick = {
+                saveProductToFirestore(context, productName, category, price, address, details, negotiable, freeShip)
+            },
             colors = ButtonDefaults.buttonColors(containerColor = Blue_text),
             modifier = Modifier.size(width = 150.dp, height = 50.dp)
         ) {
@@ -232,6 +236,33 @@ fun AddProductScreen(modifier: Modifier = Modifier) {
     }
 }
 
+fun saveProductToFirestore(context: Context,productName: String, category: String, price: String, address: String, details: String, negotiable: Boolean, freeShip: Boolean) {
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    if (userId != null) {
+        val productData = hashMapOf(
+            "productName" to productName,
+            "category" to category,
+            "price" to price,
+            "address" to address,
+            "details" to details,
+            "negotiable" to negotiable,
+            "freeShip" to freeShip
+        )
+
+        db.collection("users").document(userId).collection("products")
+            .add(productData)
+            .addOnSuccessListener {
+                Toast.makeText(context, "Đăng sản phẩm thành công!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    } else {
+        Toast.makeText(context, "Người dùng chưa đăng nhập!", Toast.LENGTH_SHORT).show()
+    }
+}
 @Composable
 fun CustomOutlinedTextField(value: String, onValueChange: (String) -> Unit, label: String, singleLine: Boolean = true) {
     OutlinedTextField(
@@ -254,4 +285,5 @@ fun SwitchWithLabel(label: String, state: Boolean, onToggle: (Boolean) -> Unit) 
         Switch(checked = state, onCheckedChange = onToggle, colors = SwitchDefaults.colors(checkedThumbColor = Color.Blue))
     }
 }
+
 
