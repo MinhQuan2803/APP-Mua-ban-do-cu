@@ -38,7 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.feature_add_product.ui.AddProductScreen
-import com.example.appmuabandocu.feature_favorite.ui.FavoriteScreen
+import com.example.appmuabandocu.feature_favorite.ui.TincuabanScreen
 import com.example.appmuabandocu.feature_home.ui.HomeScreen
 import com.example.appmuabandocu.feature_productlist.ui.ProductListScreen
 import com.example.appmuabandocu.feature_profile.ui.ProfileScreen
@@ -129,7 +129,15 @@ fun ContentScreen(
     when (selectedIndex) {
         0 -> HomeScreen(modifier = modifier, navController = navController)
         1 -> ProductListScreen()
-        2 -> FavoriteScreen()
+        2 -> TincuabanScreen(
+            auth = auth,  // Truyền FirebaseAuth
+            onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
+            onSignOut = {
+                auth.signOut()  // Đăng xuất khỏi Firebase
+                navController.navigate("login_screen")  // Điều hướng về login
+            },
+            navController = navController
+        )
         3 -> ProfileScreen(
             auth = auth,  // Truyền FirebaseAuth
             onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập

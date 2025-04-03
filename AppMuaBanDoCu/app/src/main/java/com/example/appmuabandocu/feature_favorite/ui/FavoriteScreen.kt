@@ -1,22 +1,120 @@
 package com.example.appmuabandocu.feature_favorite.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.appmuabandocu.R
+import com.example.appmuabandocu.ui.theme.Blue_text
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+@Composable
+fun TincuabanScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Unit,navController: NavController) {
+    val context = LocalContext.current
+    val user = auth.currentUser
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.padding(16.dp))
+        Text(
+            text = "Bài viết của bạn ",
+            modifier = Modifier.padding(bottom = 16.dp),
+            fontWeight = Bold,
+            fontSize = 30.sp,
+            color = Blue_text
+        )
+        Divider(
+            color = Blue_text,
+            thickness = 1.dp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (user == null) {
+            navController.navigate("login_screen")
+        } else {
+            // Hiển thị giao diện khi đã đăng nhập
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(user.photoUrl),
+                    contentDescription = "Ảnh đại diện",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = user.displayName ?: "Người dùng",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = user.email ?: "",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                ProfileOption("Tổng số bài viết") { Toast.makeText(context, "Mở thông tin cá nhân", Toast.LENGTH_SHORT).show() }
+                ProfileOption("Đang đăng") { Toast.makeText(context, "Mở quản lý mặt hàng", Toast.LENGTH_SHORT).show() }
+                ProfileOption("Đã xoá") { Toast.makeText(context, "Mở liên hệ", Toast.LENGTH_SHORT).show() }
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+            }
+        }
+    }
+}
 
 @Composable
-fun FavoriteScreen(modifier: Modifier = Modifier) {
-    Column (
+fun ProfileOption(title: String, onClick: () -> Unit) {
+    Row(
         modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ){
-        Text(text = "Favorite Screen")
-
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Icon(painterResource(id = R.drawable.ic_next), contentDescription = "Next")
     }
 }
