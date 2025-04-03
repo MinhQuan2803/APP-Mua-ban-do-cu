@@ -53,6 +53,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
     val navItemList = listOf(
         NavItem("home", R.drawable.ic_home, "home"),
         NavItem("store", R.drawable.ic_cart, "store"),
+
         NavItem("add", R.drawable.ic_add, "add"),
         NavItem("profile", R.drawable.ic_person, "profile")
     )

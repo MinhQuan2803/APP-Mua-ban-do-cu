@@ -94,7 +94,7 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                ProfileOption("Thông tin cá nhân") { Toast.makeText(context, "Mở thông tin cá nhân", Toast.LENGTH_SHORT).show() }
+                ProfileOption("Thông tin cá nhân") { navController.navigate("profile_detail")}
                 ProfileOption("Quản lý mặt hàng") { Toast.makeText(context, "Mở quản lý mặt hàng", Toast.LENGTH_SHORT).show() }
                 ProfileOption("Liên hệ") { Toast.makeText(context, "Mở liên hệ", Toast.LENGTH_SHORT).show() }
                 ProfileOption("Trợ giúp") { Toast.makeText(context, "Mở trợ giúp", Toast.LENGTH_SHORT).show() }
