@@ -83,4 +83,16 @@ dependencies {
 
     implementation ("androidx.compose.material3:material3:1.2.0")
     implementation ("androidx.navigation:navigation-compose:2.7.5")
+
+    implementation ("com.google.firebase:firebase-database:20.1.0")// Add this line for Realtime Database
+    implementation ("com.google.firebase:firebase-auth:21.1.0")
+    implementation ("com.google.firebase:firebase-appcheck-playintegrity:17.1.2") // Or the latest version
+
+    debugImplementation ("com.google.firebase:firebase-appcheck-debug:17.1.2")
+
+    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
+
+    implementation ("androidx.compose.material:material-icons-core:1.5.0")
+    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+
 }

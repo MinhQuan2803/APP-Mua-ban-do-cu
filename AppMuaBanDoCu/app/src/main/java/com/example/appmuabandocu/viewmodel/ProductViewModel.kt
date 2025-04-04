@@ -69,7 +69,6 @@ class ProductViewModel : ViewModel() {
                     Log.d("RealtimeDatabase", "Sản phẩm đã được đăng thành công!")
                     _message.value = "Sản phẩm đã được đăng thành công!"
 
-                    // Reload the list of products after posting successfully
                     loadProductsRealtime()
                 }
                 .addOnFailureListener { e ->
