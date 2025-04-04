@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,28 +44,21 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-
-
-
 
 @Composable
 fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val googleSignInClient = remember {
@@ -137,6 +136,18 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                     value = password,
                     onValueChange = { password = it },
                     label = { Text(text = "Password") },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible)
+                                    Icons.Filled.VisibilityOff
+                                else
+                                    Icons.Filled.Visibility,
+                                contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
+                            )
+                        }
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
                         focusedIndicatorColor = Blue_text,
@@ -145,8 +156,8 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                         unfocusedTextColor = Color.Black
                     )
                 )
-                TextButton(
 
+                TextButton(
                     onClick = { navController.navigate("homeNav") },
                     modifier = Modifier.align(Alignment.End)
                 ) {
@@ -165,7 +176,8 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                                 }
                             }
                     },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
                         .width(250.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Blue_text,
@@ -192,10 +204,12 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController) {
                     }) {
                         Image(painterResource(id = R.drawable.ic_google), contentDescription = "Google")
                     }
+                }
             }
         }
     }
-}}
+}
+
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {

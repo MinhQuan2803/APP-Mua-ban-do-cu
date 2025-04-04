@@ -1,6 +1,8 @@
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -9,18 +11,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
+import android.widget.Toast
 
 @Composable
 fun RegisterMainScreen(modifier: Modifier = Modifier, navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
 
@@ -57,6 +64,18 @@ fun RegisterMainScreen(modifier: Modifier = Modifier, navController: NavControll
                 value = password,
                 onValueChange = { password = it },
                 label = { Text(text = "Mật khẩu") },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible)
+                                Icons.Filled.VisibilityOff
+                            else
+                                Icons.Filled.Visibility,
+                            contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
+                        )
+                    }
+                },
                 colors = TextFieldDefaults.colors(
                     focusedTextColor = Color.Black,
                     focusedIndicatorColor = Blue_text,
@@ -72,6 +91,18 @@ fun RegisterMainScreen(modifier: Modifier = Modifier, navController: NavControll
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text(text = "Xác nhận mật khẩu") },
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible)
+                                Icons.Filled.VisibilityOff
+                            else
+                                Icons.Filled.Visibility,
+                            contentDescription = if (confirmPasswordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
+                        )
+                    }
+                },
                 colors = TextFieldDefaults.colors(
                     focusedTextColor = Color.Black,
                     focusedIndicatorColor = Blue_text,
