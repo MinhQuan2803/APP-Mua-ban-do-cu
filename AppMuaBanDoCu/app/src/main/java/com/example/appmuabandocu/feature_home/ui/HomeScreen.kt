@@ -1,5 +1,7 @@
 package com.example.appmuabandocu.feature_home.ui
 
+import ProductViewModel
+import android.util.Log
 import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,81 +44,81 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 
 
-
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
+fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: ProductViewModel = viewModel()) {
+    val products = viewModel.productList
+
+    // Log để kiểm tra danh sách sản phẩm
+    LaunchedEffect(products) {
+        Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
+    }
     Box(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Image(
-            modifier = Modifier.fillMaxSize()
-                    .matchParentSize(),
+            modifier = Modifier.fillMaxSize().matchParentSize(),
             painter = painterResource(id = R.drawable.bg2_screen),
             contentDescription = "Home Screen",
-            contentScale = ContentScale.FillBounds // cat anh vua khung hinh
+            contentScale = ContentScale.FillBounds // cắt ảnh vừa khung hình
         )
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ){
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Tiêu đề trang
+            Text(
+                text = "Thanh lý nhanh",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Blue_text,
+                modifier = Modifier.padding(10.dp).fillMaxWidth()
+            )
 
-                Text(
-                    text = "Thanh ly nhanh",
-                    fontSize = 22.sp,
-                    fontWeight = Bold,
-                    color = Blue_text,
-                    modifier = Modifier.padding(10.dp)
-                        .fillMaxWidth()
-                )
+            // Tìm kiếm
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 10.dp, end = 10.dp),
-
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 var SearchText = remember { mutableStateOf("") }
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {
-                        SearchText.value = it
-                    },
-                    placeholder = { Text("Bạn muốn mua gì ?", fontSize = 12.sp, modifier = Modifier.padding(0.dp)) },
+                    value = SearchText.value,
+                    onValueChange = { SearchText.value = it },
+                    placeholder = { Text("Bạn muốn mua gì ?", fontSize = 12.sp) },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
-                        //focusedContainerColor = Color.White,
                         focusedIndicatorColor = Blue_text,
                         unfocusedIndicatorColor = Blue_text,
                         unfocusedContainerColor = Color.White,
                     ),
-                    modifier = Modifier.height(50.dp)
-                        .weight(1f)
-
+                    modifier = Modifier.height(50.dp).weight(1f)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 IconButton(
                     modifier = Modifier
-                        .border(2.dp , Color.White, RoundedCornerShape(10.dp)),
-                    onClick = { }
-                ){
-                    Image(
-                        Icons.Default.Search,
+                        .border(2.dp, Color.White, RoundedCornerShape(10.dp)),
+                    onClick = { /* Xử lý tìm kiếm */ }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
                         contentDescription = "Search",
                         modifier = Modifier.size(40.dp)
                     )
                 }
-
             }
+
             Spacer(modifier = Modifier.height(10.dp))
+
+            // Danh mục sản phẩm
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
@@ -126,40 +129,41 @@ fun HomeScreen(modifier: Modifier = Modifier,navController: NavController) {
                 CategoryItem("Đồ gia dụng", R.drawable.chair)
                 CategoryItem("Khác", R.drawable.oder)
             }
+
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
-            ){
-                val products = List(10) { "Camera" to "500.000 đ" }
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2), // ✅ Chia 2 cột
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    items(products) { (name, price) ->
-                        ProductItem(name, price)
+            ) {
+                if (products.isEmpty()) {
+                    Text("Không có sản phẩm nào")
+                } else {
+                    // Hiển thị danh sách sản phẩm
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2), // Chia 2 cột
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        items(products) { product ->
+                            ProductItem(
+                                name = product.productName,
+                                price = product.price,
+                                imageUrl = product.imageUrl // Giả sử bạn có link ảnh
+                            )
+                        }
                     }
                 }
             }
-
         }
-
     }
 }
 
 @Composable
-fun CategoryItem(title: String, iconRes: Int,) {
-
+fun CategoryItem(title: String, iconRes: Int) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         IconButton(
-            onClick = { /* TODO: Xử lý khi bấm */ },
-            modifier = Modifier
-                .border(
-                    width = 1.dp,
-                    color = Color.Black,
-
-                    )
+            onClick = { /* TODO: Xử lý khi bấm vào danh mục */ },
+            modifier = Modifier.border(1.dp, Color.Black)
         ) {
             Icon(
                 painter = painterResource(id = iconRes),
@@ -169,21 +173,19 @@ fun CategoryItem(title: String, iconRes: Int,) {
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(title, fontSize = 10.sp,
-            textAlign = TextAlign.Center,
-        )
+        Text(title, fontSize = 10.sp, textAlign = TextAlign.Center)
     }
 }
-
 @Composable
-fun ProductItem(name: String, price: String) {
+fun ProductItem(name: String, price: String, imageUrl: String) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
     ) {
+        // Hiển thị hình ảnh sản phẩm
         Image(
-            painter = painterResource(id = R.drawable.pd_camera),
+            painter = rememberImagePainter(imageUrl), // Lấy ảnh từ Firestore (sử dụng link URL)
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -191,34 +193,32 @@ fun ProductItem(name: String, price: String) {
                 .height(150.dp)
                 .clip(RoundedCornerShape(8.dp))
         )
+
+        // Hiển thị thông tin sản phẩm
         Row {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = name,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 8.dp)
                 )
                 Text(
-                    text = price,
+                    text = "Giá: $price ",
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             Button(
-                onClick = {},
+                onClick = { /* Liên hệ với người bán */ },
                 shape = RoundedCornerShape(4.dp),
-                modifier = Modifier
-                    .padding(2.dp)
-                    .width(100.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Blue_text
-                )
-
+                modifier = Modifier.padding(2.dp).width(100.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Blue_text)
             ) {
                 Text("Liên hệ")
             }
         }
-
     }
 }

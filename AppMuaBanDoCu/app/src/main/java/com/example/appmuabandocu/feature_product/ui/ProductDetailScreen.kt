@@ -38,13 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.R
 
-@Preview(showBackground = true)
 @Composable
-fun ProductDetailScreen(modifier: Modifier = Modifier) {
+fun ProductDetailScreen(modifier: Modifier = Modifier, navController: NavController, id: String) {
     Box (
         modifier = Modifier
             .fillMaxSize()

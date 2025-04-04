@@ -1,15 +1,12 @@
 package com.example.appmuabandocu.core.navigation
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.FabPosition
@@ -18,13 +15,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
@@ -33,14 +25,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.appmuabandocu.R
-import com.example.appmuabandocu.feature_add_product.ui.AddProductScreen
 import com.example.appmuabandocu.feature_favorite.ui.TincuabanScreen
 import com.example.appmuabandocu.feature_home.ui.HomeScreen
-import com.example.appmuabandocu.feature_productlist.ui.ProductListScreen
+import com.example.appmuabandocu.feature_mxh.ui.MxhScreen
 import com.example.appmuabandocu.feature_profile.ui.ProfileScreen
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
@@ -90,7 +80,6 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
                             contentDescription = item.label) },
                         label = {
                             Text(text = item.label)
-
                         }
                     )
                 }
@@ -128,7 +117,7 @@ fun ContentScreen(
 ) {
     when (selectedIndex) {
         0 -> HomeScreen(modifier = modifier, navController = navController)
-        1 -> ProductListScreen()
+        1 -> MxhScreen(modifier = modifier)
         2 -> TincuabanScreen(
             auth = auth,  // Truyền FirebaseAuth
             onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
