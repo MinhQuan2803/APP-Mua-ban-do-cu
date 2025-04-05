@@ -1,5 +1,4 @@
 package com.example.appmuabandocu.feature_home.ui
-
 import ProductViewModel
 import android.util.Log
 import android.widget.ImageButton
@@ -49,6 +48,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
+import coil.compose.AsyncImage
 
 
 @Composable
@@ -123,11 +123,11 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CategoryItem("Đồ điện tử", R.drawable.device)
-                CategoryItem("Xe máy", R.drawable.moto)
-                CategoryItem("Thời trang", R.drawable.apparel)
-                CategoryItem("Đồ gia dụng", R.drawable.chair)
-                CategoryItem("Khác", R.drawable.oder)
+                CategoryItem("Đồ điện tử", R.drawable.ic_phone)
+                CategoryItem("Xe máy", R.drawable.ic_xemay)
+                CategoryItem("Thời trang", R.drawable.ic_aoo)
+                CategoryItem("Đồ gia dụng", R.drawable.ic_noicom)
+                CategoryItem("Khác", R.drawable.ic_condit)
             }
 
             Box(
@@ -157,68 +157,95 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
 }
 
 @Composable
-fun CategoryItem(title: String, iconRes: Int) {
+fun CategoryItem(title: String, imageRes: Int) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconButton(
-            onClick = { /* TODO: Xử lý khi bấm vào danh mục */ },
-            modifier = Modifier.border(1.dp, Color.Black)
+        Box(
+            modifier = Modifier
+                .size(50.dp) // Kích thước khung tròn
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(1.dp, Color.Black, CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(id = iconRes),
+            Image(
+                painter = painterResource(id = imageRes),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = Color.Black
+                modifier = Modifier.size(30.dp), // 👈 Thu nhỏ hình ảnh bên trong
+                contentScale = ContentScale.Fit
             )
         }
+
         Spacer(modifier = Modifier.height(8.dp))
-        Text(title, fontSize = 10.sp, textAlign = TextAlign.Center)
+        Text(
+            text = title,
+            fontSize = 10.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
+
+
 @Composable
 fun ProductItem(name: String, price: String, imageUrl: String) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White)
+            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
     ) {
-        // Hiển thị hình ảnh sản phẩm
-        Image(
-            painter = rememberImagePainter(imageUrl), // Lấy ảnh từ Firestore (sử dụng link URL)
+        // Hình ảnh sản phẩm
+        AsyncImage(
+            model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
         )
 
-        // Hiển thị thông tin sản phẩm
-        Row {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = name,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Text(
-                    text = "Giá: $price ",
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = { /* Liên hệ với người bán */ },
-                shape = RoundedCornerShape(4.dp),
-                modifier = Modifier.padding(2.dp).width(100.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Blue_text)
-            ) {
-                Text("Liên hệ")
-            }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Tên và giá
+        Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+            Text(
+                text = name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                maxLines = 2
+            )
+
+            Text(
+                text = "Giá: $price",
+                color = Color.Gray,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Nút liên hệ
+        Button(
+            onClick = { /* TODO: xử lý liên hệ */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(6.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Blue_text)
+        ) {
+            Text(
+                text = "Liên hệ",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
