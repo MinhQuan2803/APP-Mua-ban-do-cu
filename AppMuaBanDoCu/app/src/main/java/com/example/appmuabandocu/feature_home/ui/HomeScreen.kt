@@ -200,12 +200,14 @@ fun ProductItem(name: String, price: String, imageUrl: String) {
         // Hình ảnh sản phẩm
         AsyncImage(
             model = imageUrl,
-            contentDescription = null,
+            contentDescription = "Product Image",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
+            placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
+            error = painterResource(id = R.drawable.ic_xemay), // Thêm ảnh khi có lỗi tải ảnh
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -216,7 +218,8 @@ fun ProductItem(name: String, price: String, imageUrl: String) {
                 text = name,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                maxLines = 2
+                maxLines = 2,
+
             )
 
             Text(
@@ -242,10 +245,12 @@ fun ProductItem(name: String, price: String, imageUrl: String) {
             Text(
                 text = "Liên hệ",
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                color = Color.White // Đảm bảo chữ có màu trắng
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
+

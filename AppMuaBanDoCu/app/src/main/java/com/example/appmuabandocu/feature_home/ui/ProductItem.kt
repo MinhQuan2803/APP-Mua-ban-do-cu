@@ -98,7 +98,6 @@ fun ProductItem(
                         Text(text = time, fontSize = 12.sp, color = Color.Gray)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = location, fontSize = 12.sp, color = Color.Gray)
-
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f)) // Spacer đẩy dấu ba chấm sang phải
@@ -113,13 +112,15 @@ fun ProductItem(
 
             // Product Image
             AsyncImage(
-                model = imageUrl,
+                model = imageUrl, // URL ảnh cần hiển thị
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(8.dp)),
+                placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
+                error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -131,18 +132,6 @@ fun ProductItem(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Contact Button
-//            Button(
-//                onClick = { /* TODO: Gọi số hoặc mở chat */ },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(45.dp),
-//                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
-//            ) {
-//                Icon(Icons.Default.Phone, contentDescription = null)
-//                Spacer(modifier = Modifier.width(8.dp))
-//                Text(text = "Liên hệ ngay", color = Color.White)
-//            }
-
             TextButton(
                 onClick = { /* TODO: Gọi số hoặc mở chat */ },
                 modifier = Modifier
@@ -159,3 +148,4 @@ fun ProductItem(
         }
     }
 }
+

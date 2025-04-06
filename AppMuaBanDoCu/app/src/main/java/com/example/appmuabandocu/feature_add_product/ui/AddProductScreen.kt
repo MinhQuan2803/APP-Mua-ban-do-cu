@@ -2,6 +2,7 @@ package com.example.appmuabandocu.feature_add_product.ui
 
 import ProductViewModel
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -26,8 +27,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel: ProductViewModel = viewModel()) {
@@ -189,32 +192,47 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
         Spacer(modifier = Modifier.height(16.dp))
 
         // Button Đăng sản phẩm
+        val coroutineScope = rememberCoroutineScope()
+
         Button(
             onClick = {
-                val imageUrl = if (imageUris.isNotEmpty()) imageUris[0].toString() else "" // Lấy ảnh đầu tiên
-                val product = Product(
-                    productName = productName,
-                    price = price,
-                    address = address,
-                    category = category,
-                    details = details,
-                    negotiable = negotiable,
-                    freeShip = freeShip,
-                    imageUrl = imageUrl,
-                    userId = userId,
-                    userName = userName,
-                    userAvatar = userAvatar
-                )
-                viewModel.postProduct(product) // Đăng sản phẩm thông qua ViewModel
+                if (imageUris.isEmpty()) {
+                    Toast.makeText(context, "Vui lòng chọn ít nhất 1 ảnh", Toast.LENGTH_SHORT)
+                        .show()
+                    return@Button
+                }
+
+                // Coroutine để upload ảnh và gửi sản phẩm
+                coroutineScope.launch {
+                    val urls = imageUris.mapNotNull { uri ->
+                        uploadImageToCloudinary(context, uri)
+                    }
+
+                    if (urls.isNotEmpty()) {
+                        val product = Product(
+                            productName = productName,
+                            price = price,
+                            address = address,
+                            category = category,
+                            details = details,
+                            negotiable = negotiable,
+                            freeShip = freeShip,
+                            imageUrl = urls[0], // ảnh bìa
+                            imageMota = urls.drop(1), // ảnh mô tả
+                            userId = userId,
+                            userName = userName,
+                            userAvatar = userAvatar
+                        )
+                        viewModel.postProduct(product)
+                    } else {
+                        Toast.makeText(context, "Không thể đăng ảnh nào", Toast.LENGTH_SHORT).show()
+                    }
+                }
             },
             colors = ButtonDefaults.buttonColors(containerColor = Blue_text),
             modifier = Modifier.size(width = 150.dp, height = 50.dp)
         ) {
             Text("Đăng", fontSize = 20.sp, color = Color.White)
         }
-
-        // Hiển thị Snackbar khi đăng thành công
-        SnackbarHost(hostState = snackbarHostState)
     }
 }
-
