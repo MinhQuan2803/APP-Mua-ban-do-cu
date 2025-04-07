@@ -1,13 +1,10 @@
 package com.example.appmuabandocu.feature_home.ui
 import ProductViewModel
 import android.util.Log
-import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -17,38 +14,31 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import coil.compose.AsyncImage
+import com.example.appmuabandocu.data.Product
 
 
 @Composable
@@ -143,11 +133,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                         modifier = Modifier.padding(8.dp)
                     ) {
                         items(products) { product ->
-                            ProductItem(
-                                name = product.productName,
-                                price = product.price,
-                                imageUrl = product.imageUrl // Giả sử bạn có link ảnh
-                            )
+                            ProductItem(product = product)
                         }
                     }
                 }
@@ -188,7 +174,10 @@ fun CategoryItem(title: String, imageRes: Int) {
 
 
 @Composable
-fun ProductItem(name: String, price: String, imageUrl: String) {
+fun ProductItem(
+    product: Product,
+    onContactClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -199,46 +188,45 @@ fun ProductItem(name: String, price: String, imageUrl: String) {
     ) {
         // Hình ảnh sản phẩm
         AsyncImage(
-            model = imageUrl,
-            contentDescription = "Product Image",
+            model = product.imageUrl.replace("http://", "https://"),
+            contentDescription = "Hình sản phẩm",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
                 .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
-            placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
-            error = painterResource(id = R.drawable.ic_xemay), // Thêm ảnh khi có lỗi tải ảnh
+            placeholder = painterResource(id = R.drawable.ic_noicom),
+            error = painterResource(id = R.drawable.ic_xemay)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Tên và giá
-        Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
             Text(
-                text = name,
+                text = product.productName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                maxLines = 2,
-
+                fontSize = 16.sp,
+                maxLines = 2
             )
 
             Text(
-                text = "Giá: $price",
-                color = Color.Gray,
-                fontSize = 12.sp,
+                text = "Giá: ${formatPrice(product.price)}",
+                color = Color(0xFF4CAF50),
+                fontSize = 14.sp,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Nút liên hệ
         Button(
-            onClick = { /* TODO: xử lý liên hệ */ },
+            onClick = onContactClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
-                .padding(horizontal = 8.dp),
+                .height(42.dp)
+                .padding(horizontal = 12.dp),
             shape = RoundedCornerShape(6.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Blue_text)
         ) {
@@ -246,7 +234,7 @@ fun ProductItem(name: String, price: String, imageUrl: String) {
                 text = "Liên hệ",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White // Đảm bảo chữ có màu trắng
+                color = Color.White
             )
         }
 
@@ -254,3 +242,12 @@ fun ProductItem(name: String, price: String, imageUrl: String) {
     }
 }
 
+fun formatPrice(price: String): String {
+    return try {
+        val number = price.toDouble()
+        val formatter = java.text.NumberFormat.getInstance(java.util.Locale("vi", "VN"))
+        "${formatter.format(number)}₫"
+    } catch (e: NumberFormatException) {
+        price // Trả nguyên chuỗi nếu không phải số, ví dụ "Thỏa thuận"
+    }
+}
