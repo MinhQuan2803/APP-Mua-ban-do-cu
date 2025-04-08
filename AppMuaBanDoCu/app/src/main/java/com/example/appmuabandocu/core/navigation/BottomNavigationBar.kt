@@ -117,7 +117,9 @@ fun ContentScreen(
 ) {
     when (selectedIndex) {
         0 -> HomeScreen(modifier = modifier, navController = navController)
-        1 -> MxhScreen(modifier = modifier)
+        1 -> MxhScreen(
+            navController = navController
+        )
         2 -> TincuabanScreen(
             auth = auth,  // Truyền FirebaseAuth
             onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập

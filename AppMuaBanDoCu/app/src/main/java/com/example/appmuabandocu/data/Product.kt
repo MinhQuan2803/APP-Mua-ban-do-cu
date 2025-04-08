@@ -13,5 +13,6 @@ data class Product(
     val userId: String = "",
     val userName: String = "",
     val userAvatar: String = "",
-    val createdTime: String = ""
+    val createdTime: String = "",
+
 )

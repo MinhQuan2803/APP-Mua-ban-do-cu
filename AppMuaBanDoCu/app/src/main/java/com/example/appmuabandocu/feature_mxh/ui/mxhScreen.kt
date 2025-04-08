@@ -1,8 +1,11 @@
 package com.example.appmuabandocu.feature_mxh.ui
 
+import ProductViewModel
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,33 +18,60 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import com.example.appmuabandocu.R
+import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.ui.theme.Blue_text
-import com.example.appmuabandocu.feature_home.ui.ProductItem
-import com.example.appmuabandocu.feature_home.ui.ProductItemMXH
+import com.google.firebase.auth.FirebaseAuth
 
 
-@Preview(showBackground = true)
 @Composable
-fun MxhScreen(modifier: Modifier = Modifier) {
+fun MxhScreen(
+    navController: NavController,
+    viewModel: ProductViewModel = viewModel()
+){
+
+    val products1 = viewModel.productList
+
+    // Log để kiểm tra danh sách sản phẩm
+    LaunchedEffect(products1) {
+        Log.d("mxhScreen", "Sản phẩm: ${products1.size} sản phẩm")
+    }
+
     Box(
-        modifier = modifier
-            .fillMaxSize(),
+        Modifier.fillMaxSize(),
     ) {
         Column(){
             Box(
@@ -110,14 +140,10 @@ fun MxhScreen(modifier: Modifier = Modifier) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(10) {
+                items(products1.size) { index ->
                     ProductItemMXH(
-                        userName = "HuyNguyen",
-                        location = "Thảo Điền - TP.HCM",
-                        productName = "Camera mẫu mới giá rẻ",
-                        price = "2.3tr",
-                        imageUrl = "https://picsum.photos/seed/picsum/200/300",
-                        time = "1 h"
+                        product1 = products1[index],
+                        navController = navController
                     )
                 }
             }
@@ -127,3 +153,93 @@ fun MxhScreen(modifier: Modifier = Modifier) {
 }
 
 
+@Composable
+fun ProductItemMXH(
+    product1: Product,
+    onContactClick: () -> Unit = {},
+    navController: NavController,
+) {
+
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .shadow(2.dp, RoundedCornerShape(12.dp))
+            .clickable { /* TODO: Handle click */ },
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Divider(
+            color = Blue_text,
+            thickness = 1.dp,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = rememberAsyncImagePainter(product1.userAvatar),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column {
+                    Text(text = product1.userName, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row {
+                        Text(text = product1.createdTime, fontSize = 12.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = product1.address, fontSize = 12.sp, color = Color.Gray)
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f)) // Spacer đẩy dấu ba chấm sang phải
+
+                Icon(
+                    imageVector = Icons.Default.MoreVert, // dấu ba chấm dọc
+                    contentDescription = "More"
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Product Image
+            AsyncImage(
+                model = product1.imageUrl.replace("http://", "https://"), // URL ảnh cần hiển thị
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
+                error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Product Info
+            Text(text = "Tên sản phẩm: ${product1.productName}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
+            Text(text = "Giá bán: ${product1.price}", color = Color.Black, fontSize = 15.sp)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Contact Button
+            TextButton(
+                onClick = { /* TODO: Gọi số hoặc mở chat */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(45.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = null,
+                    tint = Blue_text
+                )
+                Text(text = "Liên hệ ngay", color = Blue_text)
+            }
+        }
+    }
+}

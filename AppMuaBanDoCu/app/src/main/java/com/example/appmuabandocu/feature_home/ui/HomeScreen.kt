@@ -177,7 +177,7 @@ fun CategoryItem(title: String, imageRes: Int) {
 fun ProductItem(
     product: Product,
     onContactClick: () -> Unit = {},
-            navController: NavController
+    navController: NavController
 ) {
     Column(
         modifier = Modifier
