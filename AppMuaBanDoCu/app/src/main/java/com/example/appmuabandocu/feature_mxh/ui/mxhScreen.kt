@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.feature_home.ui.ProductItem
+import com.example.appmuabandocu.feature_home.ui.ProductItemMXH
 
 
 @Preview(showBackground = true)
@@ -110,7 +111,7 @@ fun MxhScreen(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(10) {
-                    ProductItem(
+                    ProductItemMXH(
                         userName = "HuyNguyen",
                         location = "Thảo Điền - TP.HCM",
                         productName = "Camera mẫu mới giá rẻ",

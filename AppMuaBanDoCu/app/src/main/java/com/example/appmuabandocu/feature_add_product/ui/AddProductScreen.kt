@@ -222,6 +222,7 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
                             userId = userId,
                             userName = userName,
                             userAvatar = userAvatar
+
                         )
                         viewModel.postProduct(product)
                     } else {

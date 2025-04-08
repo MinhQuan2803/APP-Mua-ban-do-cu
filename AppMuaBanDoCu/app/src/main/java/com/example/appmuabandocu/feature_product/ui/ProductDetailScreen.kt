@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.feature_product.ui
 
+import ProductViewModel
 import android.location.Criteria
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
@@ -38,30 +40,57 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.R
-
+import com.example.appmuabandocu.data.Product
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.auth.FirebaseAuth
 @Composable
-fun ProductDetailScreen(modifier: Modifier = Modifier, navController: NavController, id: String) {
-    Box (
-        modifier = Modifier
-            .fillMaxSize()
-    ){
-        Column() {
-            Box (
-                modifier = Modifier.fillMaxWidth()
+fun ProductDetailScreen(
+    auth: FirebaseAuth,
+    navController: NavController,
+    id: String,
+    viewModel: ProductViewModel = viewModel()
+) {
+    val product = viewModel.productList.find { it.id == id }
+    val context = LocalContext.current
+    val user = auth.currentUser
+    if (product == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Không tìm thấy sản phẩm", color = Color.Red)
+        }
+    } else {
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(92.dp)
                     .background(Blue_text),
                 contentAlignment = Alignment.Center
-            ){
-                // thoát + dấu ba chấm
-                Row (
-                    modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .align(Alignment.BottomCenter),
-                ){
-                    IconButton(onClick = {  }) {
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowLeft,
                             contentDescription = "Back",
@@ -70,137 +99,115 @@ fun ProductDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    IconButton(onClick = {  }) {
+                    IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             modifier = Modifier.size(35.dp),
                             contentDescription = "more"
                         )
-
                     }
                 }
             }
-            // done thoát + ba chấm
 
-            // Thông tin sản phẩm
-            Column(){
-                // 1. hình ảnh sản phẩm
-                Image(
-                    painter = painterResource(id = R.drawable.pd_camera),
-//                    painter = rememberAsyncImagePainter("https://via.placeholder.com/400"),
-                    contentDescription = "Camera Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(240.dp),
-                    contentScale = ContentScale.Crop
+            // Hình ảnh sản phẩm
+            AsyncImage(
+                model = product.imageUrl.replace("http://", "https://"),
+                contentDescription = "Hình sản phẩm",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.5f),
+
+                placeholder = painterResource(id = R.drawable.ic_noicom),
+                error = painterResource(id = R.drawable.ic_xemay)
+            )
+
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = product.productName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${product.price} đ",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Red
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "Đã đăng ${product.createdTime ?: "gần đây"}",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Divider(
+                    color = Blue_text,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 12.dp)
                 )
-                //done hình ảnh sản phẩm
 
-                // 2. thông tin giá + tên sản phẩm + ngày đăng
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row {
-                        Column {
-                            Text(
-                                text = "500.000 đ",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Red
-                            )
+                Column {
+                    Text("Thông tin mặt hàng", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    InfoRow("Loại", product.category)
+                    InfoRow("Tình trạng giá", if (product.negotiable) "Có thể thương lượng" else "Không trả giá")
+                    InfoRow("Giao hàng", if (product.freeShip) "Miễn phí ship" else "Không có freeship")
+                }
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                Divider(
+                    color = Blue_text,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
 
-                            Text(
-                                text = "Camera mẫu mới giá rẻ",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(text = "Đã đăng 1 giờ trước", fontSize = 12.sp, color = Color.Gray)
+                Column {
+                    Text("Mô tả mặt hàng", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = product.details, fontSize = 16.sp, color = Color.DarkGray)
+                }
 
+                Divider(
+                    color = Blue_text,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(user?.photoUrl),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = product.userName ?: "Không rõ người đăng",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text("Đánh giá: 4.3/5", color = Color.Gray)
                     }
-
-                    Divider(color = Blue_text, thickness = 1.dp, modifier = Modifier.padding(vertical = 12.dp))
-
-                    // 3. thông tin mặt hàng
-                    Box(modifier = Modifier.fillMaxWidth()){
-                        Column {
-                            Text(
-                                text = "Thông tin mặt hàng",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            InfoRow(label = "Loại", value = "Camera")
-                            InfoRow(label = "Tình trạng", value = "Như mới")
-                            InfoRow(label = "Giao hàng", value = "Có thể giao / Tự tới lấy")
-                        }
-
-                    }
-                    
-                    Divider(color = Blue_text, thickness = 1.dp, modifier = Modifier.padding(vertical = 12.dp))
-
-                    // 4. mô tả mặt hàng
-                    Box(modifier = Modifier.fillMaxWidth()){
-                        Column {
-                            Text(
-                                text = "Mô tả mặt hàng",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "mặt hàng này còn mới nguyên siu chưa bóc tem",
-                                fontSize = 16.sp,
-                                color = Color.DarkGray
-                            )
-                        }
-                    }
-
-                    Divider(color = Blue_text, thickness = 1.dp, modifier = Modifier.padding(vertical = 12.dp))
-
-                    // 5. thông tin liên hệ
-                    Box(modifier = Modifier.fillMaxWidth()){
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box {
-                                Row {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.huynguyen),
-                                        modifier = Modifier.size(40.dp)
-                                            .clip(CircleShape),
-                                        contentDescription = null,
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Column {
-                                        Text(
-                                            text = "Nguyen Huy",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = "Đánh giá: 4.3/5",
-                                            color = Color.Gray
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.weight(1f))
-                            Button(
-                                onClick = { /*TODO*/ },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Blue_text
-                                ),
-                                modifier = Modifier
-                                    .padding(2.dp)
-                            ){
-                                Text(text = "Theo dõi")
-                            }
-                        }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = { },
+                        colors = ButtonDefaults.buttonColors(containerColor = Blue_text),
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        Text("Theo dõi")
                     }
                 }
             }

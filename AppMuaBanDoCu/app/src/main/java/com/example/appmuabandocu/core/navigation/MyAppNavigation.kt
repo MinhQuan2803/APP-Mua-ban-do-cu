@@ -13,6 +13,7 @@ import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
 import com.example.appmuabandocu.feature_auth.ui.LoginScreen
 import com.example.appmuabandocu.feature_favorite.ui.TincuabanScreen
 import com.example.appmuabandocu.feature_home.ui.HomeScreen
+import com.example.appmuabandocu.feature_product.ui.ProductDetailScreen
 import com.example.appmuabandocu.feature_profile.ui.ProfileDetailScreen
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.FirebaseAuth
@@ -50,6 +51,13 @@ fun MyAppNavigation(modifier: Modifier = Modifier) {
             AddProductScreen(category = category)
         }
         composable("profile_detail"){ ProfileDetailScreen(modifier, navController, auth) }
+        composable(
+            route = "product_detail/{id}"
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            ProductDetailScreen(navController = navController, id = id, auth = auth)
+        }
+
 
     }
 }

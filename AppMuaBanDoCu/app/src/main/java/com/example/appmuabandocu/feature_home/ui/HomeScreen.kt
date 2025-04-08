@@ -133,7 +133,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                         modifier = Modifier.padding(8.dp)
                     ) {
                         items(products) { product ->
-                            ProductItem(product = product)
+                            ProductItem(product = product, navController = navController) // truyền navController vào
                         }
                     }
                 }
@@ -176,7 +176,8 @@ fun CategoryItem(title: String, imageRes: Int) {
 @Composable
 fun ProductItem(
     product: Product,
-    onContactClick: () -> Unit = {}
+    onContactClick: () -> Unit = {},
+            navController: NavController
 ) {
     Column(
         modifier = Modifier
@@ -222,7 +223,7 @@ fun ProductItem(
 
         // Nút liên hệ
         Button(
-            onClick = onContactClick,
+            onClick = { navController.navigate("product_detail/${product.id}") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(42.dp)
@@ -231,12 +232,13 @@ fun ProductItem(
             colors = ButtonDefaults.buttonColors(containerColor = Blue_text)
         ) {
             Text(
-                text = "Liên hệ",
+                text = "Xem ngay",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White
             )
         }
+
 
         Spacer(modifier = Modifier.height(8.dp))
     }

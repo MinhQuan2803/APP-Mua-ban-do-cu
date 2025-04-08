@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.data
 data class Product(
+    val id: String = "",
     val productName: String = "",
     val price: String = "",
     val address: String = "",
@@ -11,5 +12,6 @@ data class Product(
     val imageMota: List<String> = emptyList(), // các ảnh mô tả
     val userId: String = "",
     val userName: String = "",
-    val userAvatar: String = ""
+    val userAvatar: String = "",
+    val createdTime: String = ""
 )

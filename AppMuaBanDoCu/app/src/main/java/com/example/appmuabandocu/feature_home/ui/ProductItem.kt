@@ -44,7 +44,7 @@ import com.example.appmuabandocu.R
 @Preview(showBackground = true)
 @Composable
 fun myscreen(){
-    ProductItem(
+    ProductItemMXH(
         userName = "HuyNguyen",
         location = "Thảo Điền - TP.HCM",
         productName = "Camera mẫu mới giá rẻ",
@@ -56,7 +56,7 @@ fun myscreen(){
 
 
 @Composable
-fun ProductItem(
+fun ProductItemMXH(
     userName: String,
     location: String,
     productName: String,

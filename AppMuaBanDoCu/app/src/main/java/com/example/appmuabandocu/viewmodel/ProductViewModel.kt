@@ -30,7 +30,7 @@ class ProductViewModel : ViewModel() {
         loadProductsRealtime()
     }
 
-
+    // Tải dữ liệu sản phẩm từ Firebase Realtime Database
     fun loadProductsRealtime() {
         isLoading.value = true
 
@@ -55,21 +55,29 @@ class ProductViewModel : ViewModel() {
         })
     }
 
+    // Hàm tìm sản phẩm theo id
+    fun getProductById(id: String): Product? {
+        return _productList.find { it.id == id }
+    }
 
+    // Đăng sản phẩm mới lên Firebase
     fun postProduct(product: Product) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid  // Get user ID from FirebaseAuth
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
 
         if (userId != null) {
-            // Add userId to product data
-            val productData = product.copy(userId = userId)
+            val productRef = db.push() // tạo node mới, tự sinh id
+            val productId = productRef.key ?: return
 
-            // Push the product data to Realtime Database
-            val productRef = db.push()  // This will generate a unique ID for each product
+            // Gán userId và id vào product
+            val productData = product.copy(
+                id = productId,
+                userId = userId
+            )
+
             productRef.setValue(productData)
                 .addOnSuccessListener {
                     Log.d("RealtimeDatabase", "Sản phẩm đã được đăng thành công!")
                     _message.value = "Sản phẩm đã được đăng thành công!"
-
                     loadProductsRealtime()
                 }
                 .addOnFailureListener { e ->
@@ -85,3 +93,4 @@ class ProductViewModel : ViewModel() {
     }
 
 }
+
