@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -138,7 +139,6 @@ fun MxhScreen(
                 }
             }
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(products1.size) { index ->
                     ProductItemMXH(
@@ -161,13 +161,12 @@ fun ProductItemMXH(
 ) {
 
     Card(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .shadow(2.dp, RoundedCornerShape(12.dp))
-            .clickable { /* TODO: Handle click */ },
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+            .background(Color.White)
+            .padding(bottom = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Divider(
             color = Blue_text,
@@ -207,12 +206,12 @@ fun ProductItemMXH(
 
             // Product Image
             AsyncImage(
-                model = product1.imageUrl.replace("http://", "https://"), // URL ảnh cần hiển thị
+                model = product1.imageUrl.replace("http://", "https://"),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .wrapContentHeight()
                     .clip(RoundedCornerShape(8.dp)),
                 placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
                 error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
