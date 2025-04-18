@@ -41,6 +41,7 @@ import coil.compose.AsyncImage
 import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.ui.theme.Blue_text
 
 
 @Composable
@@ -67,11 +68,13 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                 contentDescription = "Back",
                 modifier = Modifier.padding(end = 8.dp)
                     .clickable { navController.popBackStack() },
+                tint = Blue_text
             )
             androidx.compose.material.Text(
                 "Quản lý mặc hàng",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
+                color = Blue_text,
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center
             )
@@ -83,16 +86,12 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                 CircularProgressIndicator()
             }
         } else {
-            // Hiển thị thông báo lỗi nếu có
             errorMessage?.let {
                 Text(text = it, color = Color.Red, modifier = Modifier.padding(8.dp))
             }
-
-            // Hiển thị thông báo thành công nếu có
             if (message.isNotEmpty()) {
                 Text(text = message, color = Color(0xFF2E7D32), modifier = Modifier.padding(8.dp))
             }
-
             if (productList.isEmpty()) {
                 Text("Bạn chưa đăng sản phẩm nào.", modifier = Modifier.padding(top = 16.dp))
             } else {

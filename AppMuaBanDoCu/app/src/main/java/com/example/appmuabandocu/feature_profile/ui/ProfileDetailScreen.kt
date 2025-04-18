@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -57,9 +59,11 @@ fun ProfileDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                 contentDescription = "Back",
                 modifier = Modifier.padding(end = 8.dp)
                     .clickable { navController.popBackStack() },
+                tint = Blue_text
             )
             Text(
                 "Thông tin cá nhân",
+                color = Blue_text,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 16.dp),
@@ -89,8 +93,14 @@ fun ProfileDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                             modifier = Modifier.fillMaxWidth(),
                             value = user.displayName ?: "",
                             onValueChange = { },
-                            label = { Text("Tên người dùng") },
-                            readOnly = true
+                            label = { Text("Tên người dùng", color = Blue_text) },
+                            readOnly = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Blue_text,
+                                cursorColor = Color.Transparent,
+                                textColor = Blue_text
+                            )
 
                         )
                         OutlinedTextField(
@@ -98,7 +108,13 @@ fun ProfileDetailScreen(modifier: Modifier = Modifier, navController: NavControl
                             value = user.email ?: "",
                             onValueChange = { },
                             label = { Text("Email") },
-                            readOnly = true
+                            readOnly = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Blue_text,
+                                cursorColor = Color.Transparent,
+                                textColor = Blue_text
+                            )
                         )
                     }
                 }

@@ -68,11 +68,10 @@ fun MxhScreen(
 ){
     val products = viewModel.getVisibleProducts()
 
-    val products1 = viewModel.productList
 
     // Log để kiểm tra danh sách sản phẩm
-    LaunchedEffect(products1) {
-        Log.d("mxhScreen", "Sản phẩm: ${products1.size} sản phẩm")
+    LaunchedEffect(products) {
+        Log.d("mxhScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
 
     Box(
@@ -232,7 +231,7 @@ fun ProductItemMXH(
 
             // Product Info
             Text(text = "Tên sản phẩm: ${product1.productName}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
-            Text(text = "Giá bán: ${product1.price}", color = Color.Black, fontSize = 15.sp)
+            Text(text = "Giá bán: ${formatPrice(product1.price)}", color = Color.Black, fontSize = 15.sp)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -251,5 +250,15 @@ fun ProductItemMXH(
                 Text(text = "Liên hệ ngay", color = Blue_text)
             }
         }
+    }
+}
+
+fun formatPrice(price: String): String {
+    return try {
+        val number = price.toDouble()
+        val formatter = java.text.NumberFormat.getInstance(java.util.Locale("vi", "VN"))
+        "${formatter.format(number)}₫"
+    } catch (e: NumberFormatException) {
+        price // Trả nguyên chuỗi nếu không phải số, ví dụ "Thỏa thuận"
     }
 }

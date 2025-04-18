@@ -53,11 +53,6 @@ fun MyAppNavigation(modifier: Modifier = Modifier) {
         composable("category_screen") {
             CategoryScreen(
                 auth = auth,  // Truyền FirebaseAuth
-                onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
-                onSignOut = {
-                    auth.signOut()  // Đăng xuất khỏi Firebase
-                    navController.navigate("login_screen")  // Điều hướng về login
-                },
                 navController = navController
             )
         }

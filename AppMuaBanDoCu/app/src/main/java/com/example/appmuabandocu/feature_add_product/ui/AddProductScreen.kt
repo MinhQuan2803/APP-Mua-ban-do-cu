@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.data.uploadImageToCloudinary
+import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -148,11 +149,18 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = price,
-                onValueChange = { price = it },
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) {
+                        price = input
+                    }
+                },
                 label = { Text("Giá bán") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.width(200.dp).padding(vertical = 8.dp)
+                visualTransformation = CurrencyInputTransformation(),
+                modifier = Modifier
+                    .width(220.dp)
+                    .padding(vertical = 8.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             Checkbox(

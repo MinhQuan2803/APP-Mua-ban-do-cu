@@ -43,7 +43,8 @@ import com.example.appmuabandocu.data.Product
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: ProductViewModel = viewModel()) {
-    val products = viewModel.productList
+
+    val products = viewModel.getVisibleProducts()
 
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
@@ -133,7 +134,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                         modifier = Modifier.padding(8.dp)
                     ) {
                         items(products) { product ->
-                            ProductItem(product = product, navController = navController) // truyền navController vào
+                            ProductItem(product = product, navController = navController, toggleProductVisibility = { viewModel.toggleProductVisibility(product.id) }) // truyền navController vào
                         }
                     }
                 }
@@ -149,7 +150,7 @@ fun CategoryItem(title: String, imageRes: Int) {
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp) // Kích thước khung tròn
+                .size(50.dp)
                 .clip(CircleShape)
                 .background(Color.White)
                 .border(1.dp, Color.Black, CircleShape),
@@ -158,7 +159,7 @@ fun CategoryItem(title: String, imageRes: Int) {
             Image(
                 painter = painterResource(id = imageRes),
                 contentDescription = null,
-                modifier = Modifier.size(30.dp), // 👈 Thu nhỏ hình ảnh bên trong
+                modifier = Modifier.size(30.dp),
                 contentScale = ContentScale.Fit
             )
         }
@@ -177,7 +178,8 @@ fun CategoryItem(title: String, imageRes: Int) {
 fun ProductItem(
     product: Product,
     onContactClick: () -> Unit = {},
-    navController: NavController
+    navController: NavController,
+    toggleProductVisibility: () -> Unit
 ) {
     Column(
         modifier = Modifier

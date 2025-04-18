@@ -29,7 +29,7 @@ import com.google.firebase.ktx.Firebase
 import java.util.Locale
 
 @Composable
-fun CategoryScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Unit, navController: NavController) {
+fun CategoryScreen(auth: FirebaseAuth, navController: NavController) {
     val context = LocalContext.current
     val user = auth.currentUser
 

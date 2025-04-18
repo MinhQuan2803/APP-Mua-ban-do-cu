@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
 import com.example.appmuabandocu.feature_favorite.ui.TincuabanScreen
 import com.example.appmuabandocu.feature_home.ui.HomeScreen
 import com.example.appmuabandocu.feature_mxh.ui.MxhScreen
@@ -43,7 +44,8 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
     val navItemList = listOf(
         NavItem("home", R.drawable.ic_home, "home"),
         NavItem("store", R.drawable.ic_cart, "store"),
-        NavItem("manage", R.drawable.ic_add, "manage"),
+        NavItem("add", R.drawable.ic_add, "Add"),
+        NavItem("manage", R.drawable.ic_manage, "manage"),
         NavItem("profile", R.drawable.ic_person, "profile")
     )
     var selectedIndex by remember { mutableStateOf(0) }
@@ -84,22 +86,6 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
                 }
             }
         },
-
-
-
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate("category_screen") },
-                containerColor = Color(0xFF2196F3),
-                shape = CircleShape,
-                modifier = Modifier
-                    .offset(y = 45.dp)
-                    .size(65.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center // FAB nằm giữa
     ) { innerPadding ->
         ContentScreen(modifier = Modifier.padding(innerPadding),navController = navController, selectedIndex, auth = FirebaseAuth.getInstance())
 
@@ -119,7 +105,11 @@ fun ContentScreen(
         1 -> MxhScreen(
             navController = navController
         )
-        2 -> TincuabanScreen(
+        2 -> CategoryScreen(
+            auth = auth,  // Truyền FirebaseAuth
+            navController = navController
+        )
+        3 -> TincuabanScreen(
             auth = auth,  // Truyền FirebaseAuth
             onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
             onSignOut = {
@@ -128,7 +118,7 @@ fun ContentScreen(
             },
             navController = navController
         )
-        3 -> ProfileScreen(
+        4 -> ProfileScreen(
             auth = auth,  // Truyền FirebaseAuth
             onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
             onSignOut = {
