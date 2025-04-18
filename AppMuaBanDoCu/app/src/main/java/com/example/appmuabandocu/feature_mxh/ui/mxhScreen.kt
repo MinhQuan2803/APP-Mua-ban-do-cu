@@ -120,24 +120,24 @@ fun MxhScreen(
                     }
                 }
             }
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ){
-                val categories = listOf("TV", "Laptop", "Điện thoại", "camera cũ", "Tủ lạnh")
-                Row(modifier = Modifier.padding(8.dp)) {
-                    categories.forEach { category ->
-                        Box(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .background(Color.LightGray, RoundedCornerShape(8.dp))
-                                .padding(8.dp)
-                        ) {
-                            Text(category, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
+//            Box(
+//                modifier = Modifier.fillMaxWidth(),
+//                contentAlignment = Alignment.Center
+//            ){
+//                val categories = listOf("TV", "Laptop", "Điện thoại", "camera cũ", "Tủ lạnh")
+//                Row(modifier = Modifier.padding(8.dp)) {
+//                    categories.forEach { category ->
+//                        Box(
+//                            modifier = Modifier
+//                                .padding(4.dp)
+//                                .background(Color.LightGray, RoundedCornerShape(8.dp))
+//                                .padding(8.dp)
+//                        ) {
+//                            Text(category, fontWeight = FontWeight.Bold)
+//                        }
+//                    }
+//                }
+//            }
             LazyColumn(
             ) {
                 items(products1.size) { index ->
@@ -156,7 +156,6 @@ fun MxhScreen(
 @Composable
 fun ProductItemMXH(
     product1: Product,
-    onContactClick: () -> Unit = {},
     navController: NavController,
 ) {
 
@@ -167,6 +166,7 @@ fun ProductItemMXH(
             .padding(bottom = 8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        onClick = { navController.navigate("product_detail/${product1.id}") },
     ) {
         Divider(
             color = Blue_text,
