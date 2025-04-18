@@ -143,7 +143,7 @@ fun ProductDetailScreen(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "Đã đăng ${product.createdTime ?: "gần đây"}",
+                        text = "Đã đăng ${product.timestamp.toString() ?: "gần đây"}",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )

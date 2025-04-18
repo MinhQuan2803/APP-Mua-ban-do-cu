@@ -196,6 +196,12 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
 
         Button(
             onClick = {
+                // Kiểm tra các trường bắt buộc
+                if (productName.isEmpty() || price.isEmpty() || address.isEmpty()) {
+                    Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
                 if (imageUris.isEmpty()) {
                     Toast.makeText(context, "Vui lòng chọn ít nhất 1 ảnh", Toast.LENGTH_SHORT)
                         .show()
@@ -222,7 +228,6 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
                             userId = userId,
                             userName = userName,
                             userAvatar = userAvatar
-
                         )
                         viewModel.postProduct(product)
                     } else {
@@ -237,3 +242,4 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
         }
     }
 }
+

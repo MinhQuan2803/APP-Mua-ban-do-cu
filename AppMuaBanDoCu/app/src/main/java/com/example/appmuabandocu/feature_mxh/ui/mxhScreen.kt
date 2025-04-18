@@ -56,6 +56,9 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -63,6 +66,7 @@ fun MxhScreen(
     navController: NavController,
     viewModel: ProductViewModel = viewModel()
 ){
+    val products = viewModel.getVisibleProducts()
 
     val products1 = viewModel.productList
 
@@ -140,10 +144,11 @@ fun MxhScreen(
 //            }
             LazyColumn(
             ) {
-                items(products1.size) { index ->
+                items(products.size) { index ->
                     ProductItemMXH(
-                        product1 = products1[index],
-                        navController = navController
+                        product1 = products[index],
+                        navController = navController,
+                        toggleProductVisibility = { viewModel.toggleProductVisibility(products[index].id) }
                     )
                 }
             }
@@ -157,7 +162,13 @@ fun MxhScreen(
 fun ProductItemMXH(
     product1: Product,
     navController: NavController,
+    toggleProductVisibility: () -> Unit
 ) {
+    val formattedTime = remember(product1.timestamp) {
+        val date = Date(product1.timestamp)
+        val formatter = SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault())
+        formatter.format(date)
+    }
 
     Card(
         modifier = Modifier
@@ -189,7 +200,7 @@ fun ProductItemMXH(
                     Text(text = product1.userName, fontWeight = FontWeight.Bold, color = Color.Black)
                     Spacer(modifier = Modifier.height(4.dp))
                     Row {
-                        Text(text = product1.createdTime, fontSize = 12.sp, color = Color.Gray)
+                        Text(text = formattedTime, fontSize = 12.sp, color = Color.Gray)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = product1.address, fontSize = 12.sp, color = Color.Gray)
                     }

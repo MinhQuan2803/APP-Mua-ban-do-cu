@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.Date
 
 class ProductViewModel : ViewModel() {
 
@@ -28,6 +29,7 @@ class ProductViewModel : ViewModel() {
 
     init {
         loadProductsRealtime()
+
     }
 
     // Tải dữ liệu sản phẩm từ Firebase Realtime Database
@@ -55,14 +57,14 @@ class ProductViewModel : ViewModel() {
         })
     }
 
-    // Hàm tìm sản phẩm theo id
-    fun getProductById(id: String): Product? {
-        return _productList.find { it.id == id }
-    }
 
     // Đăng sản phẩm mới lên Firebase
     fun postProduct(product: Product) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val productWithTimeAndStock = product.copy(
+            timestamp = Date().time,
+            inStock = true
+        )
 
         if (userId != null) {
             val productRef = db.push() // tạo node mới, tự sinh id
@@ -71,7 +73,9 @@ class ProductViewModel : ViewModel() {
             // Gán userId và id vào product
             val productData = product.copy(
                 id = productId,
-                userId = userId
+                userId = userId,
+                timestamp = Date().time,
+                inStock = true
             )
 
             productRef.setValue(productData)
@@ -90,6 +94,26 @@ class ProductViewModel : ViewModel() {
             Log.e("RealtimeDatabase", "Người dùng chưa đăng nhập!")
             _message.value = "Người dùng chưa đăng nhập!"
         }
+    }
+
+
+    // Hàm để thay đổi trạng thái ẩn/hiện của một sản phẩm
+    fun toggleProductVisibility(productId: String) {
+        _productList.find { it.id == productId }?.let {
+            val updatedProduct = it.copy(displayed = it.displayed?.not()) // Đảo trạng thái hiển thị
+            _productList[_productList.indexOf(it)] = updatedProduct
+        }
+    }
+
+    // Hàm để lấy danh sách sản phẩm (chỉ trả về sản phẩm không bị ẩn)
+    fun getVisibleProducts(): List<Product> {
+        return _productList.filter { it.displayed == true }
+    }
+
+    // Cập nhật danh sách sản phẩm (ví dụ: gọi từ Firestore)
+    fun setProductList(products: List<Product>) {
+        _productList.clear()
+        _productList.addAll(products)
     }
 
 }

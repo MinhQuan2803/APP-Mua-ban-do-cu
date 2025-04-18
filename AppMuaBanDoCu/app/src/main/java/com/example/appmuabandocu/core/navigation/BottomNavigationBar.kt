@@ -43,8 +43,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
     val navItemList = listOf(
         NavItem("home", R.drawable.ic_home, "home"),
         NavItem("store", R.drawable.ic_cart, "store"),
-
-        NavItem("add", R.drawable.ic_add, "add"),
+        NavItem("manage", R.drawable.ic_add, "manage"),
         NavItem("profile", R.drawable.ic_person, "profile")
     )
     var selectedIndex by remember { mutableStateOf(0) }
@@ -54,9 +53,9 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
             NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp),
+                    .height(80.dp),
 
-                tonalElevation = 20.dp,
+                tonalElevation = 12.dp,
                 containerColor = Color(0xFFFFFFFF),
             ){
 
@@ -76,7 +75,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
 
                         },
                         icon = { Icon(painterResource(id = item.icon),
-                            modifier = Modifier.size(35.dp),
+                            modifier = Modifier.size(24.dp),
                             contentDescription = item.label) },
                         label = {
                             Text(text = item.label)
