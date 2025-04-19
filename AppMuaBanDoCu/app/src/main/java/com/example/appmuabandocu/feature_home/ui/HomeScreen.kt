@@ -21,8 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,12 +42,27 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.viewmodel.SearchProductViewModel
+
+
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: ProductViewModel = viewModel()) {
+fun HomeScreen(modifier: Modifier = Modifier,
+               navController: NavController,
+               viewModel: ProductViewModel = viewModel(),
+               searchViewModel: SearchProductViewModel = viewModel()
+
+
+) {
+
 
     val products = viewModel.getVisibleProducts()
+
+
+    val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
+    var query by remember { mutableStateOf("") }
+
 
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
@@ -72,6 +90,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                 modifier = Modifier.padding(10.dp).fillMaxWidth()
             )
 
+
             // Tìm kiếm
             Row(
                 modifier = Modifier
@@ -80,10 +99,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                var SearchText = remember { mutableStateOf("") }
                 OutlinedTextField(
-                    value = SearchText.value,
-                    onValueChange = { SearchText.value = it },
+                    value = query,
+                    onValueChange = {
+                        query = it
+                        searchViewModel.searchProducts(it)
+                    },
                     placeholder = { Text("Bạn muốn mua gì ?", fontSize = 12.sp) },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
@@ -107,7 +128,9 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                 }
             }
 
+
             Spacer(modifier = Modifier.height(10.dp))
+
 
             // Danh mục sản phẩm
             Row(
@@ -121,6 +144,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                 CategoryItem("Khác", R.drawable.ic_condit)
             }
 
+
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -133,8 +157,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                         columns = GridCells.Fixed(2), // Chia 2 cột
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        items(products) { product ->
-                            ProductItem(product = product, navController = navController, toggleProductVisibility = { viewModel.toggleProductVisibility(product.id) }) // truyền navController vào
+                        items(searchResults.size) { index ->
+                            ProductItem(
+                                product = searchResults[index],
+                                navController = navController,
+                                toggleProductVisibility = { viewModel.toggleProductVisibility(searchResults[index].id) }
+                            )
                         }
                     }
                 }
@@ -142,6 +170,7 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
         }
     }
 }
+
 
 @Composable
 fun CategoryItem(title: String, imageRes: Int) {
@@ -164,6 +193,7 @@ fun CategoryItem(title: String, imageRes: Int) {
             )
         }
 
+
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = title,
@@ -172,6 +202,8 @@ fun CategoryItem(title: String, imageRes: Int) {
         )
     }
 }
+
+
 
 
 @Composable
@@ -202,7 +234,9 @@ fun ProductItem(
             error = painterResource(id = R.drawable.ic_xemay)
         )
 
+
         Spacer(modifier = Modifier.height(8.dp))
+
 
         // Tên và giá
         Column(modifier = Modifier.padding(horizontal = 12.dp)) {
@@ -213,6 +247,7 @@ fun ProductItem(
                 maxLines = 2
             )
 
+
             Text(
                 text = "Giá: ${formatPrice(product.price)}",
                 color = Color(0xFF4CAF50),
@@ -221,7 +256,9 @@ fun ProductItem(
             )
         }
 
+
         Spacer(modifier = Modifier.height(12.dp))
+
 
         // Nút liên hệ
         Button(
@@ -242,9 +279,12 @@ fun ProductItem(
         }
 
 
+
+
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
+
 
 fun formatPrice(price: String): String {
     return try {

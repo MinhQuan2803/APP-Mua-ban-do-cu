@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.feature_profile.ui
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,12 +45,16 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 
 
+
+
 @Composable
 fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavController) {
     val isLoading = viewModel.isLoading.value
     val errorMessage = viewModel.errorMessage.value
     val message = viewModel.message.collectAsState().value
     val productList = viewModel.productList
+    val productToDelete = viewModel.productToDelete.value
+
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -81,6 +86,7 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
         }
         Spacer(modifier = Modifier.padding(16.dp))
 
+
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -102,8 +108,34 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                 }
             }
         }
+
+
+        // Xác nhận xóa sản phẩm
+        productToDelete?.let { product ->
+            androidx.compose.material.AlertDialog(
+                onDismissRequest = { viewModel.cancelDelete() },
+                title = { Text("Xác nhận xóa", color = Color.Black) },
+                text = { Text("Bạn có chắc muốn xóa sản phẩm '${product.productName}' không?", color = Color.Black) },
+                confirmButton = {
+                    androidx.compose.material.TextButton(onClick = {
+                        viewModel.performDelete()
+                    }) {
+                        Text("Xóa", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    androidx.compose.material.TextButton(onClick = {
+                        viewModel.cancelDelete()
+                    }) {
+                        Text("Hủy", color = Color.Black)
+                    }
+                }
+            )
+        }
     }
 }
+
+
 
 
 @Composable
@@ -132,6 +164,7 @@ fun ProductItem(product: Product, viewModel: ManageProductViewModel) {
                 error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
             )
 
+
             // Chi tiết sản phẩm
             Column(
                 modifier = Modifier.weight(1f)
@@ -141,6 +174,7 @@ fun ProductItem(product: Product, viewModel: ManageProductViewModel) {
                 Text(text = "Địa chỉ: ${product.address}", style = MaterialTheme.typography.body2)
             }
 
+
             // Nút ẩn/hiện sản phẩm
             IconButton(onClick = { viewModel.toggleProductDisplay(product) }) {
                 Icon(
@@ -149,8 +183,9 @@ fun ProductItem(product: Product, viewModel: ManageProductViewModel) {
                 )
             }
 
+
             // Nút xóa sản phẩm
-            IconButton(onClick = { viewModel.deleteProduct(product) }) {
+            IconButton(onClick = { viewModel.confirmDelete(product) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_delete),
                     contentDescription = "Xóa sản phẩm"
@@ -159,6 +194,7 @@ fun ProductItem(product: Product, viewModel: ManageProductViewModel) {
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

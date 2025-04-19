@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.viewmodel
 
+
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -15,27 +16,39 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.jvm.java
 
+
 class ManageProductViewModel : ViewModel() {
 
+
     private val db: DatabaseReference = FirebaseDatabase.getInstance().getReference("products")
+
 
     private val _productList = mutableStateListOf<Product>()
     val productList: List<Product> get() = _productList
 
+
     val isLoading = mutableStateOf(false)
     val errorMessage = mutableStateOf<String?>(null)
 
+
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message
+
+
+    private val _productToDelete = mutableStateOf<Product?>(null)
+    val productToDelete = _productToDelete
+
 
     init {
         loadUserProducts()
     }
 
+
     // Tải sản phẩm của người dùng từ Firebase
     fun loadUserProducts() {
         isLoading.value = true
         val userId = FirebaseAuth.getInstance().currentUser?.uid
+
 
         if (userId != null) {
             db.orderByChild("userId").equalTo(userId).addValueEventListener(object : ValueEventListener {
@@ -51,6 +64,7 @@ class ManageProductViewModel : ViewModel() {
                     Log.d("RealtimeDatabase", "Dữ liệu sản phẩm của người dùng đã được tải thành công!")
                 }
 
+
                 override fun onCancelled(error: DatabaseError) {
                     isLoading.value = false
                     errorMessage.value = "Lỗi khi tải dữ liệu: ${error.message}"
@@ -63,10 +77,12 @@ class ManageProductViewModel : ViewModel() {
         }
     }
 
+
     // Cập nhật trạng thái hiển thị (ẩn/hiện) của sản phẩm
     fun toggleProductDisplay(product: Product) {
         val productId = product.id
         val updatedProduct = product.displayed?.let { product.copy(displayed = !it) }
+
 
         if (productId.isNotEmpty()) {
             db.child(productId).setValue(updatedProduct)
@@ -80,10 +96,31 @@ class ManageProductViewModel : ViewModel() {
                 }
         }
     }
+    // Gọi khi người dùng chọn xóa
+    fun confirmDelete(product: Product) {
+        _productToDelete.value = product
+    }
+
+
+    // Hủy xác nhận xóa
+    fun cancelDelete() {
+        _productToDelete.value = null
+    }
+
+
+    // Xác nhận xóa sản phẩm đã chọn
+    fun performDelete() {
+        _productToDelete.value?.let {
+            deleteProduct(it)
+        }
+        _productToDelete.value = null
+    }
+
 
     // Xóa sản phẩm khỏi Firebase
     fun deleteProduct(product: Product) {
         val productId = product.id
+
 
         if (productId.isNotEmpty()) {
             db.child(productId).removeValue()

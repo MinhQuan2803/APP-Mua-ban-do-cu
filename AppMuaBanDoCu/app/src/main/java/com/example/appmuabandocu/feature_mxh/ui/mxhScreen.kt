@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.feature_mxh.ui
 
+
 import ProductViewModel
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -36,8 +37,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,24 +59,35 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.ui.theme.Blue_text
+import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 
+
+
 @Composable
 fun MxhScreen(
     navController: NavController,
-    viewModel: ProductViewModel = viewModel()
+    viewModel: ProductViewModel = viewModel(),
+    searchViewModel: SearchProductViewModel = viewModel()
 ){
     val products = viewModel.getVisibleProducts()
+
+
+    val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
+    var query by remember { mutableStateOf("") }
+
+
 
 
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("mxhScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
+
 
     Box(
         Modifier.fillMaxSize(),
@@ -83,18 +98,21 @@ fun MxhScreen(
                     .height(140.dp)
                     .background(Blue_text),
 
+
                 contentAlignment = Alignment.Center
             ){
                 Spacer(modifier = Modifier.height(30.dp))
                 Box {
                     Row (
 
+
                     ){
                         var SearchText = remember { mutableStateOf("") }
                         OutlinedTextField(
-                            value = "searchText",
+                            value = query,
                             onValueChange = {
-                                SearchText.value = it
+                                query = it
+                                searchViewModel.searchProducts(it)
                             },
                             shape = RoundedCornerShape(10.dp),
                             placeholder = { Text("Bạn muốn mua gì ?") },
@@ -143,18 +161,23 @@ fun MxhScreen(
 //            }
             LazyColumn(
             ) {
-                items(products.size) { index ->
+                items(searchResults.size) { index ->
                     ProductItemMXH(
-                        product1 = products[index],
+                        product1 = searchResults[index],
                         navController = navController,
-                        toggleProductVisibility = { viewModel.toggleProductVisibility(products[index].id) }
+                        toggleProductVisibility = { viewModel.toggleProductVisibility(searchResults[index].id) }
                     )
                 }
             }
 
+
         }
     }
 }
+
+
+
+
 
 
 @Composable
@@ -168,6 +191,7 @@ fun ProductItemMXH(
         val formatter = SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault())
         formatter.format(date)
     }
+
 
     Card(
         modifier = Modifier
@@ -193,7 +217,9 @@ fun ProductItemMXH(
                         .clip(CircleShape)
                 )
 
+
                 Spacer(modifier = Modifier.width(8.dp))
+
 
                 Column {
                     Text(text = product1.userName, fontWeight = FontWeight.Bold, color = Color.Black)
@@ -206,13 +232,16 @@ fun ProductItemMXH(
                 }
                 Spacer(modifier = Modifier.weight(1f)) // Spacer đẩy dấu ba chấm sang phải
 
+
                 Icon(
                     imageVector = Icons.Default.MoreVert, // dấu ba chấm dọc
                     contentDescription = "More"
                 )
             }
 
+
             Spacer(modifier = Modifier.height(8.dp))
+
 
             // Product Image
             AsyncImage(
@@ -227,13 +256,17 @@ fun ProductItemMXH(
                 error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
             )
 
+
             Spacer(modifier = Modifier.height(8.dp))
+
 
             // Product Info
             Text(text = "Tên sản phẩm: ${product1.productName}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.Black)
             Text(text = "Giá bán: ${formatPrice(product1.price)}", color = Color.Black, fontSize = 15.sp)
 
+
             Spacer(modifier = Modifier.height(8.dp))
+
 
             // Contact Button
             TextButton(
@@ -252,6 +285,7 @@ fun ProductItemMXH(
         }
     }
 }
+
 
 fun formatPrice(price: String): String {
     return try {
