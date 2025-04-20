@@ -74,9 +74,9 @@ fun AddProductScreen(
     var selectedWard by remember { mutableStateOf<Ward?>(null) }
 
     address = buildString {
-        if (selectedProvince != null) append("${selectedProvince!!.name}, ")
+        if (selectedWard != null) append("${selectedWard!!.name}, ")
         if (selectedDistrict != null) append("${selectedDistrict!!.name}, ")
-        if (selectedWard != null) append(selectedWard!!.name)
+        if (selectedProvince != null) append(selectedProvince!!.name)
     }
 
     val imagePicker = rememberLauncherForActivityResult(
