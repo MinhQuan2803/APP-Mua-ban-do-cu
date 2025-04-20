@@ -4,7 +4,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.appmuabandocu.data.District
 import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.data.Province
+import com.example.appmuabandocu.data.Ward
+import com.example.appmuabandocu.repository.ProductRepository
+import com.example.thuchanhapi.api.ApiClient
+import com.example.thuchanhapi.api.ApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -16,6 +22,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Date
+import kotlin.getValue
+import kotlin.setValue
 
 class ProductViewModel : ViewModel() {
 
@@ -34,12 +42,70 @@ class ProductViewModel : ViewModel() {
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
 
+    // Repository cho API địa chỉ hành chính
+    private val productRepository = ProductRepository(apiService = ApiClient.provinceService)
 
+    // StateFlow cho tỉnh, huyện, xã
+    private val _provinces = MutableStateFlow<List<Province>>(emptyList())
+    val provinces: StateFlow<List<Province>> = _provinces
+
+    private val _districts = MutableStateFlow<List<District>>(emptyList())
+    val districts: StateFlow<List<District>> = _districts
+
+    private val _wards = MutableStateFlow<List<Ward>>(emptyList())
+    val wards: StateFlow<List<Ward>> = _wards
 
     init {
         loadProductsRealtime()
-
+        loadProvinces() // 🟢 Load danh sách tỉnh khi ViewModel khởi tạo
     }
+
+    // 🟢 Load tỉnh
+    fun loadProvinces() {
+        viewModelScope.launch {
+            try {
+                val response = productRepository.getProvinces()
+                _provinces.value = response
+                if (response.isNotEmpty()) {
+                    loadDistricts(response[0].code.toString()) // Tự động load quận của tỉnh đầu tiên
+                } else {
+                    Log.e("ViewModel", "Danh sách tỉnh trống")
+                }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Lỗi load tỉnh: ${e.message}")
+            }
+        }
+    }
+
+    // 🟢 Load quận/huyện bằng API riêng (depth=2 cho province cụ thể)
+    fun loadDistricts(provinceCode: String) {
+        viewModelScope.launch {
+            try {
+                val province = productRepository.getProvinceByCode(provinceCode) // API: /api/p/{provinceCode}?depth=2
+                _districts.value = province.districts ?: emptyList()
+
+                if (_districts.value.isNotEmpty()) {
+                    loadWards(_districts.value[0].code.toString())
+                }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Lỗi load huyện: ${e.message}")
+            }
+        }
+    }
+
+    // 🟢 Load xã/phường bằng API riêng (depth=2 cho district cụ thể)
+    fun loadWards(districtCode: String) {
+        viewModelScope.launch {
+            try {
+                val district = productRepository.getDistrictByCode(districtCode) // API: /api/d/{districtCode}?depth=2
+                _wards.value = district.wards ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Lỗi load xã: ${e.message}")
+            }
+        }
+    }
+
+
 
     // Tải dữ liệu sản phẩm từ Firebase Realtime Database
     fun loadProductsRealtime() {
@@ -134,6 +200,7 @@ class ProductViewModel : ViewModel() {
             _isRefreshing.value = false
         }
     }
+
 
 }
 

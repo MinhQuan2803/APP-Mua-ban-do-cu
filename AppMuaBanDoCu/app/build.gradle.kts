@@ -98,5 +98,9 @@ dependencies {
 
     implementation("androidx.compose.material:material:1.7.8")
 
+    //lấy api nè
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
 
 }

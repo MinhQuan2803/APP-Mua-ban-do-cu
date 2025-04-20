@@ -13,8 +13,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
@@ -30,30 +32,52 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import com.example.appmuabandocu.data.District
 import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.data.Province
+import com.example.appmuabandocu.data.Ward
 import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
+import com.example.appmuabandocu.feature_product.ui.AddressInput
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel: ProductViewModel = viewModel()) {
-
+fun AddProductScreen(
+    modifier: Modifier = Modifier,
+    category: String, viewModel:
+    ProductViewModel = viewModel()
+) {
 
     // Quan sát trạng thái thông báo từ ViewModel
     val message = viewModel.message.collectAsState().value
     val context = LocalContext.current
     var productName by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
     var numberUser by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
     var details by remember { mutableStateOf("") }
     var negotiable by remember { mutableStateOf(false) }
     var freeShip by remember { mutableStateOf(false) }
     var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
+
+    val provinces by viewModel.provinces.collectAsState()
+    val districts by viewModel.districts.collectAsState()
+    val wards by viewModel.wards.collectAsState()
+
+    // State cho địa chỉ
+    var selectedProvince by remember { mutableStateOf<Province?>(null) }
+    var selectedDistrict by remember { mutableStateOf<District?>(null) }
+    var selectedWard by remember { mutableStateOf<Ward?>(null) }
+
+    address = buildString {
+        if (selectedProvince != null) append("${selectedProvince!!.name}, ")
+        if (selectedDistrict != null) append("${selectedDistrict!!.name}, ")
+        if (selectedWard != null) append(selectedWard!!.name)
+    }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -66,16 +90,18 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
     val userAvatar = FirebaseAuth.getInstance().currentUser?.photoUrl?.toString() ?: ""
 
 
-    // SnackbarHostState để hiển thị Snackbar
-    val snackbarHostState = remember { SnackbarHostState() }
 
-
-    // Khi có message mới, hiển thị Snackbar
-    LaunchedEffect(message) {
-        if (message.isNotEmpty()) {
-            snackbarHostState.showSnackbar(message)
-        }
-    }
+//
+//    // SnackbarHostState để hiển thị Snackbar
+//    val snackbarHostState = remember { SnackbarHostState() }
+//
+//
+//    // Khi có message mới, hiển thị Snackbar
+//    LaunchedEffect(message) {
+//        if (message.isNotEmpty()) {
+//            snackbarHostState.showSnackbar(message)
+//        }
+//    }
 
 
     // Reset UI khi nhận thông báo thành công
@@ -96,7 +122,8 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -190,12 +217,30 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
         }
 
 
-        OutlinedTextField(
-            value = address,
-            onValueChange = { address = it },
-            label = { Text("Địa chỉ") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        AddressInput(
+            provinces = provinces,
+            districts = districts,
+            wards = wards,
+            selectedProvince = selectedProvince,
+            selectedDistrict = selectedDistrict,
+            selectedWard = selectedWard,
+            onProvinceChange = { province ->
+                selectedProvince = province
+                selectedDistrict = null
+                selectedWard = null
+                viewModel.loadDistricts(province.code.toString()) // Gọi hàm khi chọn tỉnh
+            },
+            onDistrictChange = { district ->
+                selectedDistrict = district
+                selectedWard = null
+                viewModel.loadWards(district.code.toString()) // Gọi hàm khi chọn huyện
+            },
+            onWardChange = { ward ->
+                selectedWard = ward
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            loadDistricts = { viewModel.loadDistricts(it) },
+            loadWards = { viewModel.loadWards(it) }
         )
 
 
@@ -327,3 +372,4 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
         }
     }
 }
+
