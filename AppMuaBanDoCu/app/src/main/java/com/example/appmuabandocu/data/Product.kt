@@ -7,6 +7,7 @@ data class Product(
     val productName: String = "",
     val price: String = "",
     val address: String = "",
+    val numberUser: String = "",
     val category: String = "",
     val details: String = "",
     val negotiable: Boolean = false,
@@ -19,5 +20,4 @@ data class Product(
     val timestamp: Long = Date().time, // sẽ được ghi đè trong ViewModel
     val inStock: Boolean = true,  // sẽ được ghi đè trong ViewModel
     val displayed: Boolean? = true
-
 )

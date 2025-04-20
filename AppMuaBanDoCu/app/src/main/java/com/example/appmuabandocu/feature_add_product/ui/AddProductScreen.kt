@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,8 +37,10 @@ import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel: ProductViewModel = viewModel()) {
+
 
     // Quan sát trạng thái thông báo từ ViewModel
     val message = viewModel.message.collectAsState().value
@@ -42,22 +48,27 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
     var productName by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
+    var numberUser by remember { mutableStateOf("") }
     var details by remember { mutableStateOf("") }
     var negotiable by remember { mutableStateOf(false) }
     var freeShip by remember { mutableStateOf(false) }
     var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
+
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris -> imageUris = imageUris + uris }
+
 
     // Lấy thông tin người dùng từ FirebaseAuth
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     val userName = FirebaseAuth.getInstance().currentUser?.displayName ?: ""
     val userAvatar = FirebaseAuth.getInstance().currentUser?.photoUrl?.toString() ?: ""
 
+
     // SnackbarHostState để hiển thị Snackbar
     val snackbarHostState = remember { SnackbarHostState() }
+
 
     // Khi có message mới, hiển thị Snackbar
     LaunchedEffect(message) {
@@ -66,19 +77,21 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
         }
     }
 
+
     // Reset UI khi nhận thông báo thành công
     LaunchedEffect(message) {
         if (message == "Sản phẩm đã được đăng thành công!") {
-            // Reset giá trị khi đăng sản phẩm thành công
             productName = ""
             price = ""
             address = ""
+            numberUser = ""
             details = ""
             negotiable = false
             freeShip = false
             imageUris = emptyList()
         }
     }
+
 
     Column(
         modifier = Modifier
@@ -93,11 +106,13 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
+
         Divider(
             color = Blue_text,
             thickness = 1.dp,
             modifier = Modifier.padding(vertical = 5.dp)
         )
+
 
         // Hiển thị ảnh sản phẩm đã chọn
         LazyRow(
@@ -128,6 +143,7 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             }
         }
 
+
         // Các trường nhập liệu của sản phẩm
         OutlinedTextField(
             value = productName,
@@ -137,6 +153,7 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
 
+
         OutlinedTextField(
             value = category,
             onValueChange = { },
@@ -145,6 +162,7 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             readOnly = true,
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
+
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
@@ -171,6 +189,7 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             Text("Cho trả giá")
         }
 
+
         OutlinedTextField(
             value = address,
             onValueChange = { address = it },
@@ -178,6 +197,41 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
+
+
+        val phoneError = numberUser.isNotEmpty() && !numberUser.matches(Regex("^(0|84)[0-9]{9}$"))
+        OutlinedTextField(
+            value = numberUser,
+            onValueChange = {
+                // Chỉ cho nhập số và giới hạn độ dài
+                if (it.length <= 11 && it.all { char -> char.isDigit() }) {
+                    numberUser = it
+                }
+            },
+            isError = phoneError,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Done
+            ),
+            label = { Text("Số điện thoại") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            supportingText = {
+                AnimatedVisibility(visible = phoneError) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Error,
+                            contentDescription = null,
+                            tint = Color.Red,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Số điện thoại không hợp lệ", color = Color(0xFFFFA726))
+                    }
+                }
+            }
+        )
+
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
@@ -188,6 +242,7 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             Text("Miễn phí vận chuyển")
         }
 
+
         OutlinedTextField(
             value = details,
             onValueChange = { details = it },
@@ -197,18 +252,22 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
             modifier = Modifier.fillMaxWidth().height(150.dp).padding(vertical = 8.dp)
         )
 
+
         Spacer(modifier = Modifier.height(16.dp))
+
 
         // Button Đăng sản phẩm
         val coroutineScope = rememberCoroutineScope()
-
+        var isPosting by remember { mutableStateOf(false) }
         Button(
             onClick = {
+                if (isPosting) return@Button
                 // Kiểm tra các trường bắt buộc
-                if (productName.isEmpty() || price.isEmpty() || address.isEmpty()) {
+                if (productName.isEmpty() || price.isEmpty() || address.isEmpty() || numberUser.isEmpty() || details.isEmpty()) {
                     Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+
 
                 if (imageUris.isEmpty()) {
                     Toast.makeText(context, "Vui lòng chọn ít nhất 1 ảnh", Toast.LENGTH_SHORT)
@@ -216,17 +275,23 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
                     return@Button
                 }
 
+
+                isPosting = true
+
+
                 // Coroutine để upload ảnh và gửi sản phẩm
                 coroutineScope.launch {
                     val urls = imageUris.mapNotNull { uri ->
                         uploadImageToCloudinary(context, uri)
                     }
 
+
                     if (urls.isNotEmpty()) {
                         val product = Product(
                             productName = productName,
                             price = price,
                             address = address,
+                            numberUser = numberUser,
                             category = category,
                             details = details,
                             negotiable = negotiable,
@@ -241,13 +306,24 @@ fun AddProductScreen(modifier: Modifier = Modifier, category: String, viewModel:
                     } else {
                         Toast.makeText(context, "Không thể đăng ảnh nào", Toast.LENGTH_SHORT).show()
                     }
+                    isPosting = false
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = Blue_text),
+            enabled = !isPosting,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isPosting) Color.Gray else Blue_text
+            ),
             modifier = Modifier.size(width = 150.dp, height = 50.dp)
         ) {
-            Text("Đăng", fontSize = 20.sp, color = Color.White)
+            if (isPosting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Đăng", fontSize = 20.sp, color = Color.White)
+            }
         }
     }
 }
-
