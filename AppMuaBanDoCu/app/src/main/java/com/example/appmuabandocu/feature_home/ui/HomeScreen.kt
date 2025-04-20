@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,13 +66,21 @@ fun HomeScreen(modifier: Modifier = Modifier,
     val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
 
+    val focusManager = LocalFocusManager.current
+
 
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize()
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                focusManager.clearFocus() // thoát focus khi click ra ngoài
+            },
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -277,10 +288,6 @@ fun ProductItem(
                 color = Color.White
             )
         }
-
-
-
-
         Spacer(modifier = Modifier.height(8.dp))
     }
 }

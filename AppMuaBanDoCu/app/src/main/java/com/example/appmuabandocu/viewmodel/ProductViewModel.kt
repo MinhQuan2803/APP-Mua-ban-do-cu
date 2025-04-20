@@ -3,6 +3,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.appmuabandocu.data.Product
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -10,8 +11,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.util.Date
 
 class ProductViewModel : ViewModel() {
@@ -26,6 +29,12 @@ class ProductViewModel : ViewModel() {
 
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+
+
 
     init {
         loadProductsRealtime()
@@ -114,6 +123,16 @@ class ProductViewModel : ViewModel() {
     fun setProductList(products: List<Product>) {
         _productList.clear()
         _productList.addAll(products)
+    }
+
+    fun refreshProducts() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            // Giả sử gọi lại API hoặc Firebase
+            loadProductsRealtime() // hoặc loadVisibleProducts()
+            delay(1000) // delay 1s để hiển thị hiệu ứng rõ ràng (tùy)
+            _isRefreshing.value = false
+        }
     }
 
 }

@@ -22,10 +22,14 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -68,8 +72,10 @@ import java.util.Locale
 
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MxhScreen(
+    modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: ProductViewModel = viewModel(),
     searchViewModel: SearchProductViewModel = viewModel()
@@ -80,7 +86,11 @@ fun MxhScreen(
     val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
 
-
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { viewModel.refreshProducts() }
+    )
 
 
     // Log để kiểm tra danh sách sản phẩm
@@ -88,11 +98,11 @@ fun MxhScreen(
         Log.d("mxhScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
 
-
     Box(
-        Modifier.fillMaxSize(),
-    ) {
-        Column(){
+        modifier = modifier.fillMaxSize()
+    ){
+        Column(
+        ){
             Box(
                 modifier = Modifier.fillMaxWidth()
                     .height(140.dp)
@@ -104,10 +114,7 @@ fun MxhScreen(
                 Spacer(modifier = Modifier.height(30.dp))
                 Box {
                     Row (
-
-
                     ){
-                        var SearchText = remember { mutableStateOf("") }
                         OutlinedTextField(
                             value = query,
                             onValueChange = {
@@ -159,20 +166,38 @@ fun MxhScreen(
 //                    }
 //                }
 //            }
-            LazyColumn(
-            ) {
-                items(searchResults.size) { index ->
-                    ProductItemMXH(
-                        product1 = searchResults[index],
-                        navController = navController,
-                        toggleProductVisibility = { viewModel.toggleProductVisibility(searchResults[index].id) }
-                    )
+            Box(
+                Modifier
+                    .pullRefresh(pullRefreshState)
+                    .fillMaxWidth()
+            ){
+                LazyColumn(
+                ) {
+                    items(searchResults.size) { index ->
+                        ProductItemMXH(
+                            product1 = searchResults[index],
+                            navController = navController,
+                            toggleProductVisibility = {
+                                viewModel.toggleProductVisibility(
+                                    searchResults[index].id
+                                )
+                            }
+                        )
+                    }
                 }
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
             }
-
 
         }
     }
+
+    Spacer(modifier = Modifier.height(200.dp))
+
+
 }
 
 

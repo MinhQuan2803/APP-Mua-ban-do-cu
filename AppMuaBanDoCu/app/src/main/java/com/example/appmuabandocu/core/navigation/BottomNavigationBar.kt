@@ -103,6 +103,7 @@ fun ContentScreen(
     when (selectedIndex) {
         0 -> HomeScreen(modifier = modifier, navController = navController)
         1 -> MxhScreen(
+            modifier = modifier,
             navController = navController
         )
         2 -> CategoryScreen(
