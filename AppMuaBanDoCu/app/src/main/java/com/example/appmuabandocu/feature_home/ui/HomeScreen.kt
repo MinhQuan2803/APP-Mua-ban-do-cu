@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -21,13 +23,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,20 +45,38 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, viewModel: ProductViewModel = viewModel()) {
+fun HomeScreen(modifier: Modifier = Modifier,
+               navController: NavController,
+               viewModel: ProductViewModel = viewModel(),
+               searchViewModel: SearchProductViewModel = viewModel()
+
+) {
 
     val products = viewModel.getVisibleProducts()
+
+    val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
+    var query by remember { mutableStateOf("") }
+
+    val focusManager = LocalFocusManager.current
 
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize()
+            // thoát focus khi click ra ngoài
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                focusManager.clearFocus()
+            },
+        contentAlignment = Alignment.Center,
     ) {
         Image(
             modifier = Modifier.fillMaxSize().matchParentSize(),
@@ -80,10 +104,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                var SearchText = remember { mutableStateOf("") }
                 OutlinedTextField(
-                    value = SearchText.value,
-                    onValueChange = { SearchText.value = it },
+                    value = query,
+                    onValueChange = {
+                        query = it
+                        searchViewModel.searchProducts(it)
+                    },
                     placeholder = { Text("Bạn muốn mua gì ?", fontSize = 12.sp) },
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
@@ -133,8 +159,12 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController, view
                         columns = GridCells.Fixed(2), // Chia 2 cột
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        items(products) { product ->
-                            ProductItem(product = product, navController = navController, toggleProductVisibility = { viewModel.toggleProductVisibility(product.id) }) // truyền navController vào
+                        items(searchResults.size) { index ->
+                            ProductItem(
+                                product = searchResults[index],
+                                navController = navController,
+                                toggleProductVisibility = { viewModel.toggleProductVisibility(searchResults[index].id) }
+                            )
                         }
                     }
                 }

@@ -3,7 +3,7 @@ package com.example.appmuabandocu.data
 import java.util.Date
 
 data class Product(
-    val id: String = "",
+    var id: String = "",
     val productName: String = "",
     val price: String = "",
     val address: String = "",
@@ -17,7 +17,7 @@ data class Product(
     val userName: String = "",
     val userAvatar: String = "",
     val timestamp: Long = Date().time, // sẽ được ghi đè trong ViewModel
-    val inStock: Boolean = true ,  // sẽ được ghi đè trong ViewModel
+    val inStock: Boolean = true,  // sẽ được ghi đè trong ViewModel
     val displayed: Boolean? = true
 
 )

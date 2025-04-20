@@ -50,6 +50,7 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
     val errorMessage = viewModel.errorMessage.value
     val message = viewModel.message.collectAsState().value
     val productList = viewModel.productList
+    val productToDelete = viewModel.productToDelete.value
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -102,6 +103,29 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                 }
             }
         }
+
+        // Xác nhận xóa sản phẩm
+        productToDelete?.let { product ->
+            androidx.compose.material.AlertDialog(
+                onDismissRequest = { viewModel.cancelDelete() },
+                title = { Text("Xác nhận xóa", color = Color.Black) },
+                text = { Text("Bạn có chắc muốn xóa sản phẩm '${product.productName}' không?", color = Color.Black) },
+                confirmButton = {
+                    androidx.compose.material.TextButton(onClick = {
+                        viewModel.performDelete()
+                    }) {
+                        Text("Xóa", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    androidx.compose.material.TextButton(onClick = {
+                        viewModel.cancelDelete()
+                    }) {
+                        Text("Hủy", color = Color.Black)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -150,7 +174,7 @@ fun ProductItem(product: Product, viewModel: ManageProductViewModel) {
             }
 
             // Nút xóa sản phẩm
-            IconButton(onClick = { viewModel.deleteProduct(product) }) {
+            IconButton(onClick = { viewModel.confirmDelete(product) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_delete),
                     contentDescription = "Xóa sản phẩm"

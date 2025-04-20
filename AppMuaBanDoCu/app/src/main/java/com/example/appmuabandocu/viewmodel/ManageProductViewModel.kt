@@ -28,6 +28,9 @@ class ManageProductViewModel : ViewModel() {
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message
 
+    private val _productToDelete = mutableStateOf<Product?>(null)
+    val productToDelete = _productToDelete
+
     init {
         loadUserProducts()
     }
@@ -79,6 +82,23 @@ class ManageProductViewModel : ViewModel() {
                     Log.e("RealtimeDatabase", "Lỗi cập nhật hiển thị sản phẩm: ", e)
                 }
         }
+    }
+    // Gọi khi người dùng chọn xóa
+    fun confirmDelete(product: Product) {
+        _productToDelete.value = product
+    }
+
+    // Hủy xác nhận xóa
+    fun cancelDelete() {
+        _productToDelete.value = null
+    }
+
+    // Xác nhận xóa sản phẩm đã chọn
+    fun performDelete() {
+        _productToDelete.value?.let {
+            deleteProduct(it)
+        }
+        _productToDelete.value = null
     }
 
     // Xóa sản phẩm khỏi Firebase
