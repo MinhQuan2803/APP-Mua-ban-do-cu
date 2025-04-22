@@ -59,7 +59,7 @@ fun FavoriteScreen(
     ) {
         Spacer(modifier = Modifier.padding(16.dp))
         Text(
-            text = "Mặt hàng đang lưu",
+            text = "Bài viết yêu thích",
             modifier = Modifier.padding(bottom = 16.dp),
             fontWeight = Bold,
             fontSize = 30.sp,
@@ -75,7 +75,7 @@ fun FavoriteScreen(
         // Hiển thị sản phẩm yêu thích
         LazyColumn {
             items(favoriteProducts.size) { product ->
-                ProductItem(product = favoriteProducts[product], viewModel = favoriteViewModel)
+                ProductItem(navController = navController, product = favoriteProducts[product], viewModel = favoriteViewModel)
             }
         }
 
@@ -83,13 +83,20 @@ fun FavoriteScreen(
 }
 
 @Composable
-fun ProductItem(product: Product, viewModel: FavoriteViewModel) {
-    val favoriteViewModel: FavoriteViewModel = viewModel()
-    val favoriteIds = favoriteViewModel.favoriteProductIds.collectAsState()
+fun ProductItem(
+    product: Product,
+    viewModel: FavoriteViewModel,
+    navController: NavController // truyền NavController
+) {
+    val favoriteIds = viewModel.favoriteProductIds.collectAsState()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable {
+                navController.navigate("product_detail/${product.id}")// điều hướng
+            },
         shape = RoundedCornerShape(8.dp),
     ) {
         Row(
@@ -98,30 +105,27 @@ fun ProductItem(product: Product, viewModel: FavoriteViewModel) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Hình ảnh sản phẩm
             AsyncImage(
                 model = product.imageUrl.replace("http://", "https://"),
                 contentDescription = null,
                 modifier = Modifier
                     .size(60.dp)
                     .padding(end = 16.dp),
-                placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
-                error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
+                placeholder = painterResource(id = R.drawable.ic_noicom),
+                error = painterResource(id = R.drawable.ic_condit),
             )
 
-
-            // Chi tiết sản phẩm
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(text = product.productName, style = androidx.compose.material.MaterialTheme.typography.h6)
-                Text(text = formatPrice(product.price), style = androidx.compose.material.MaterialTheme.typography.body2)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = product.productName, style = MaterialTheme.typography.h6)
+                Text(text = formatPrice(product.price), style = MaterialTheme.typography.body2)
                 Text(text = "Địa chỉ: ${product.address}", style = MaterialTheme.typography.body2)
             }
 
-
-            IconButton(onClick = {favoriteViewModel.toggleFavorite(product.id) }) {
-                androidx.compose.material3.Icon(
+            IconButton(
+                onClick = { viewModel.toggleFavorite(product.id) },
+                enabled = false // Vô hiệu hóa onClick
+            ) {
+                Icon(
                     imageVector = if (favoriteIds.value.contains(product.id))
                         Icons.Default.Favorite else
                         Icons.Default.FavoriteBorder,

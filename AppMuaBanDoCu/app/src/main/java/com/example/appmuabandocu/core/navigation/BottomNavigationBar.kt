@@ -49,7 +49,7 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
         NavItem("home", R.drawable.ic_home, "Home"),
         NavItem("store", R.drawable.ic_cart, "Chợ"),
         NavItem("add", R.drawable.ic_camera, "Đăng"),
-        NavItem("manage", R.drawable.ic_manage, "Bài viết"),
+        NavItem("manage", R.drawable.ic_manage, "Đã thích"),
         NavItem("profile", R.drawable.ic_person, "Tui")
     )
     var selectedIndex by remember { mutableStateOf(0) }

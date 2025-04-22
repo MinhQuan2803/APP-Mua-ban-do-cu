@@ -38,7 +38,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier) {
         composable("home_screen") { HomeScreen(modifier, navController) }
         composable("homeNav") { BottomNavigationBar(modifier, navController) }
 
-        composable("add_product_screen") { AddProductScreen(modifier, "Đồ bán") }
+        composable("add_product_screen") { AddProductScreen(category = "",navController = navController) }
 
         composable("favorite_screen") {
             FavoriteScreen(
@@ -55,7 +55,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier) {
         }
         composable("add_product_screen/{category}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category") ?: ""
-            AddProductScreen(category = category)
+            AddProductScreen(category = category,navController = navController)
         }
 
         composable(

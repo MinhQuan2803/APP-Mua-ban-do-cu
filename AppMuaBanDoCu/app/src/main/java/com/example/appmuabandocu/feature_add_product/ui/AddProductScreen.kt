@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.data.District
 import com.example.appmuabandocu.data.Product
@@ -45,6 +46,7 @@ import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
 import com.example.appmuabandocu.feature_product.ui.AddressInput
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -72,7 +74,8 @@ fun createImageFile(context: Context): File {
 fun AddProductScreen(
     modifier: Modifier = Modifier,
     category: String, viewModel:
-    ProductViewModel = viewModel()
+    ProductViewModel = viewModel(),
+    navController: NavController
 ) {
 
     // Quan sát trạng thái thông báo từ ViewModel
@@ -174,7 +177,7 @@ fun AddProductScreen(
             text = "Đăng bán mặt hàng",
             fontSize = 24.sp,
             color = Blue_text,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(top = 10.dp)
         )
 
 
@@ -218,6 +221,7 @@ fun AddProductScreen(
                         .size(100.dp)
                         .background(Color.LightGray, RoundedCornerShape(8.dp))
                         .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                        .padding(end = 4.dp)
                         .clickable {
                             // Tạo Uri ảnh tạm thời và mở camera
                             val uri = FileProvider.getUriForFile(
@@ -418,6 +422,14 @@ fun AddProductScreen(
                             userAvatar = userAvatar
                         )
                         viewModel.postProduct(product)
+                        Toast.makeText(context, "Đăng bài viết thành công", Toast.LENGTH_SHORT).show()
+
+// ⏳ Chờ 2 giây rồi mới điều hướng
+                        delay(2000)
+
+                        navController.navigate("homeNav") {
+                            popUpTo("add_product") { inclusive = true }
+                        }
                     } else {
                         Toast.makeText(context, "Không thể đăng ảnh nào", Toast.LENGTH_SHORT).show()
                     }

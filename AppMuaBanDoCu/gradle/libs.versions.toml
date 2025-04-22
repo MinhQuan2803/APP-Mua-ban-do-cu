@@ -1,4 +1,5 @@
 [versions]
+accompanistPager = "0.24.13-alpha"
 agp = "8.9.1"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
@@ -16,6 +17,7 @@ credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
 
 [libraries]
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

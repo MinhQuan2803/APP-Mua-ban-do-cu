@@ -76,7 +76,7 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                 tint = Blue_text
             )
             androidx.compose.material.Text(
-                "Quản lý mặc hàng",
+                "Bài viết của bạn",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Blue_text,
@@ -103,7 +103,8 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(productList.size) { product ->
-                        ProductItem(product = productList[product], viewModel = viewModel)
+                        ProductItem(product = productList[product], viewModel = viewModel,navController)
+
                     }
                 }
             }
@@ -139,13 +140,18 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
 
 
 @Composable
-fun ProductItem(product: Product, viewModel: ManageProductViewModel) {
+fun ProductItem(product: Product, viewModel: ManageProductViewModel,navController: NavController) {
     val displayed = product.displayed ?: true // Mặc định hiển thị sản phẩm
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable {
+                navController.navigate("product_detail/${product.id}")
+            },
         shape = RoundedCornerShape(8.dp),
+
     ) {
         Row(
             modifier = Modifier
