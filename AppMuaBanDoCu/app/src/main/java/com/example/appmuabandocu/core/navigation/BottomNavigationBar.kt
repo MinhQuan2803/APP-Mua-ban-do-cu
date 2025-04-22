@@ -4,6 +4,7 @@ import ProductViewModel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,6 +28,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
@@ -43,11 +46,11 @@ data class NavItem(val route: String, val icon: Int, val label: String)
 @Composable
 fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostController) {
     val navItemList = listOf(
-        NavItem("home", R.drawable.ic_home, "home"),
-        NavItem("store", R.drawable.ic_cart, "store"),
-        NavItem("add", R.drawable.ic_add, "Add"),
-        NavItem("manage", R.drawable.ic_manage, "manage"),
-        NavItem("profile", R.drawable.ic_person, "profile")
+        NavItem("home", R.drawable.ic_home, "Home"),
+        NavItem("store", R.drawable.ic_cart, "Chợ"),
+        NavItem("add", R.drawable.ic_camera, "Đăng"),
+        NavItem("manage", R.drawable.ic_manage, "Bài viết"),
+        NavItem("profile", R.drawable.ic_person, "Tui")
     )
     var selectedIndex by remember { mutableStateOf(0) }
     Scaffold(
@@ -56,8 +59,9 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
             NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp),
-
+                    .navigationBarsPadding() // <- Đặt cái này TRƯỚC .height()
+                    .height(65.dp)// 56dp là chiều cao mặc định, 80dp hơi to nên dễ bị đè
+                .padding(bottom = 4.dp),
                 tonalElevation = 12.dp,
                 containerColor = Color(0xFFFFFFFF),
             ){
@@ -78,11 +82,15 @@ fun BottomNavigationBar(modifier: Modifier = Modifier, navController: NavHostCon
 
                         },
                         icon = { Icon(painterResource(id = item.icon),
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(30.dp),
                             contentDescription = item.label) },
                         label = {
-                            Text(text = item.label)
-                        }
+                            Text(
+                                text = item.label,
+                                fontSize = 12.sp, // Kích thước chữ đồng nhất
+                                fontWeight = FontWeight.Normal // Đồng nhất font-weight
+                            )
+                        }, alwaysShowLabel = true
                     )
                 }
             }

@@ -79,6 +79,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
     LaunchedEffect(products) {
         Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
+    
     Box(
         modifier = modifier.fillMaxSize()
             .clickable(
