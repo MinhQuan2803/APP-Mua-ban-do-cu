@@ -2,6 +2,7 @@ package com.example.appmuabandocu.feature_mxh.ui
 
 
 import ProductViewModel
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -52,10 +53,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -216,6 +222,8 @@ fun ProductItemMXH(
         val formatter = SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault())
         formatter.format(date)
     }
+    val phoneNumber = product1.numberUser
+    val context = LocalContext.current
 
 
     Card(
@@ -242,24 +250,31 @@ fun ProductItemMXH(
                         .clip(CircleShape)
                 )
 
-
                 Spacer(modifier = Modifier.width(8.dp))
 
-
                 Column {
-                    Text(text = product1.userName, fontWeight = FontWeight.Bold, color = Color.Black)
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
+                                append(product1.userName)
+                            }
+                            withStyle(style = SpanStyle(color = Color.Black)) {
+                                append(" đã đăng một mặt hàng")
+                            }
+                        },
+                        fontSize = 14.sp
+                    )
                     Row {
                         Text(text = formattedTime, fontSize = 12.sp, color = Color.Gray)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = product1.address, fontSize = 12.sp, color = Color.Gray)
+                        Text(text = product1.provinceFB, fontSize = 12.sp, color = Color.Gray)
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f)) // Spacer đẩy dấu ba chấm sang phải
+                Spacer(modifier = Modifier.weight(1f))
 
 
                 Icon(
-                    imageVector = Icons.Default.MoreVert, // dấu ba chấm dọc
+                    imageVector = Icons.Default.MoreVert,
                     contentDescription = "More"
                 )
             }
@@ -295,7 +310,10 @@ fun ProductItemMXH(
 
             // Contact Button
             TextButton(
-                onClick = { /* TODO: Gọi số hoặc mở chat */ },
+                onClick = {  val intent = Intent(Intent.ACTION_DIAL).apply {
+                    data = "tel:$phoneNumber".toUri()
+                }
+                    context.startActivity(intent) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
@@ -305,7 +323,13 @@ fun ProductItemMXH(
                     contentDescription = null,
                     tint = Blue_text
                 )
-                Text(text = "Liên hệ ngay", color = Blue_text)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Liên hệ ngay",
+                    color = Blue_text,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
         }
     }

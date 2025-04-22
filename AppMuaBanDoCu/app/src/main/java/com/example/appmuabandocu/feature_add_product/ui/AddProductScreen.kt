@@ -82,6 +82,7 @@ fun AddProductScreen(
     var price by remember { mutableStateOf("") }
     var numberUser by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
+    var provinceFB by remember { mutableStateOf("") }
     var details by remember { mutableStateOf("") }
     var negotiable by remember { mutableStateOf(false) }
     var freeShip by remember { mutableStateOf(false) }
@@ -97,11 +98,14 @@ fun AddProductScreen(
     var selectedDistrict by remember { mutableStateOf<District?>(null) }
     var selectedWard by remember { mutableStateOf<Ward?>(null) }
 
+    provinceFB = selectedProvince?.name ?: ""
+
     address = buildString {
         if (selectedWard != null) append("${selectedWard!!.name}, ")
         if (selectedDistrict != null) append("${selectedDistrict!!.name}, ")
         if (selectedProvince != null) append(selectedProvince!!.name)
     }
+
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -149,6 +153,7 @@ fun AddProductScreen(
             productName = ""
             price = ""
             address = ""
+            provinceFB = ""
             numberUser = ""
             details = ""
             negotiable = false
@@ -400,6 +405,7 @@ fun AddProductScreen(
                             productName = productName,
                             price = price,
                             address = address,
+                            provinceFB = provinceFB,
                             numberUser = numberUser,
                             category = category,
                             details = details,
@@ -436,4 +442,3 @@ fun AddProductScreen(
         }
     }
 }
-
