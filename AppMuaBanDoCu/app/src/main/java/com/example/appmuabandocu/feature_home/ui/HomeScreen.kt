@@ -68,7 +68,13 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
     val focusManager = LocalFocusManager.current
 
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    val filteredProducts = products.filter {
+        selectedCategory == null || it.category == selectedCategory
+    }
 
+    // Kết quả cuối cùng cần hiển thị (ưu tiên kết quả tìm kiếm nếu có)
+    val displayProducts = if (query.isNotBlank()) searchResults else filteredProducts
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
@@ -148,12 +154,24 @@ fun HomeScreen(modifier: Modifier = Modifier,
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CategoryItem("Đồ điện tử", R.drawable.ic_phone)
-                CategoryItem("Xe máy", R.drawable.ic_xemay)
-                CategoryItem("Thời trang", R.drawable.ic_aoo)
-                CategoryItem("Đồ gia dụng", R.drawable.ic_noicom)
-                CategoryItem("Khác", R.drawable.ic_condit)
+                CategoryItem("Đồ điện tử", R.drawable.ic_phone, selectedCategory == "Thiết bị điện tử") {
+                    selectedCategory = if (selectedCategory == "Thiết bị điện tử") null else "Thiết bị điện tử"
+                }
+                CategoryItem("Xe máy", R.drawable.ic_xemay, selectedCategory == "Xe cộ") {
+                    selectedCategory = if (selectedCategory == "Xe cộ") null else "Xe cộ"
+                }
+                CategoryItem("Thời trang", R.drawable.ic_aoo, selectedCategory == "Quần áo") {
+                    selectedCategory = if (selectedCategory == "Quần áo") null else "Quần áo"
+                }
+                CategoryItem("Đồ gia dụng", R.drawable.ic_noicom, selectedCategory == "Đồ gia dụng") {
+                    selectedCategory = if (selectedCategory == "Đồ gia dụng") null else "Đồ gia dụng"
+                }
+                CategoryItem("Khác", R.drawable.ic_condit, selectedCategory == "Khác") {
+                    selectedCategory = if (selectedCategory == "Khác") null else "Khác"
+                }
             }
+
+
 
 
             Box(
@@ -168,11 +186,11 @@ fun HomeScreen(modifier: Modifier = Modifier,
                         columns = GridCells.Fixed(2), // Chia 2 cột
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        items(searchResults.size) { index ->
+                        items(displayProducts) { product ->
                             ProductItem(
-                                product = searchResults[index],
+                                product = product,
                                 navController = navController,
-                                toggleProductVisibility = { viewModel.toggleProductVisibility(searchResults[index].id) }
+                                toggleProductVisibility = { viewModel.toggleProductVisibility(product.id) }
                             )
                         }
                     }
@@ -184,16 +202,22 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
 
 @Composable
-fun CategoryItem(title: String, imageRes: Int) {
+fun CategoryItem(
+    title: String,
+    imageRes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     Column(
+        modifier = Modifier.clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Color.White)
-                .border(1.dp, Color.Black, CircleShape),
+                .background( Color.White)
+                .border(2.dp, if (isSelected) Blue_text else Color.Black, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -204,12 +228,13 @@ fun CategoryItem(title: String, imageRes: Int) {
             )
         }
 
-
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = title,
             fontSize = 10.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = if (isSelected) Blue_text else Color.Black,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
     }
 }

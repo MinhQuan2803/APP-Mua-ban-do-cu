@@ -60,6 +60,9 @@ class ProductViewModel : ViewModel() {
         loadProvinces() // 🟢 Load danh sách tỉnh khi ViewModel khởi tạo
     }
 
+    private val _productsByCategory = MutableStateFlow<List<Product>>(emptyList())
+    val productsByCategory: StateFlow<List<Product>> = _productsByCategory
+
     // 🟢 Load tỉnh
     fun loadProvinces() {
         viewModelScope.launch {
@@ -199,6 +202,25 @@ class ProductViewModel : ViewModel() {
             delay(1000) // delay 1s để hiển thị hiệu ứng rõ ràng (tùy)
             _isRefreshing.value = false
         }
+    }
+    fun getProductsByCategory(category: String) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("products")
+
+        dbRef.orderByChild("category").equalTo(category)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val productList = mutableListOf<Product>()
+                    for (child in snapshot.children) {
+                        val product = child.getValue(Product::class.java)
+                        product?.let { productList.add(it) }
+                    }
+                    _productsByCategory.value = productList
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle error
+                }
+            })
     }
 
 
