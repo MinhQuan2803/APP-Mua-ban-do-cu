@@ -122,7 +122,7 @@ fun ProductDetailScreen(
                         Spacer(modifier = Modifier.weight(1f))
                         IconButton(onClick = { }) {
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
+                                painter = painterResource(id = R.drawable.ic_traitim),
                                 modifier = Modifier.size(35.dp),
                                 contentDescription = "more"
                             )
