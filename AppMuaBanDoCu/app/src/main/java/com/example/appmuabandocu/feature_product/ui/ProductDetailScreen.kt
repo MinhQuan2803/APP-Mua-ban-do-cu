@@ -278,7 +278,7 @@ fun ProductDetailScreen(
                                 .padding(bottom = 12.dp)
                         ) {
                             Text(
-                                text = product.numberUser,
+                                text = "Liên hệ ${product.numberUser}",
                                 color = Color.White,
                                 fontSize = 16.sp
                             )
