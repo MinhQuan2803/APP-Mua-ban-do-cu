@@ -1,7 +1,9 @@
 package com.example.appmuabandocu.feature_add_product.ui
 
 import ProductViewModel
+import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +33,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.data.District
@@ -42,8 +46,28 @@ import com.example.appmuabandocu.feature_product.ui.AddressInput
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
+@Throws(IOException::class)
+fun createImageFile(context: Context): File {
+    // Tạo tên file ảnh
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+    val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
 
+    // Tạo file ảnh tạm thời
+    val image = File.createTempFile(
+        "JPEG_${timeStamp}_",  /* Tiền tố của tên file */
+        ".jpg",                /* Đuôi file */
+        storageDir             /* Thư mục lưu file */
+    )
+
+    // Trả về đường dẫn file ảnh
+    return image
+}
 @Composable
 fun AddProductScreen(
     modifier: Modifier = Modifier,
@@ -89,7 +113,22 @@ fun AddProductScreen(
     val userName = FirebaseAuth.getInstance().currentUser?.displayName ?: ""
     val userAvatar = FirebaseAuth.getInstance().currentUser?.photoUrl?.toString() ?: ""
 
-
+    val cameraImageUri = remember { mutableStateOf<Uri?>(null) }
+    fun onImagePicked(uri: Uri) {
+        // Thêm ảnh vào danh sách ảnh đã chọn
+        imageUris = imageUris + uri
+    }
+    // Sử dụng rememberLauncherForActivityResult để mở camera
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            cameraImageUri.value?.let { uri ->
+                // Xử lý ảnh sau khi chụp
+                onImagePicked(uri) // Giả sử bạn có hàm xử lý ảnh đã chọn
+            }
+        }
+    }
 
 //
 //    // SnackbarHostState để hiển thị Snackbar
@@ -166,6 +205,31 @@ fun AddProductScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text("+", fontSize = 30.sp, color = Color.Black)
+                }
+            }
+            item {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(Color.LightGray, RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                        .clickable {
+                            // Tạo Uri ảnh tạm thời và mở camera
+                            val uri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.provider",
+                                createImageFile(context)
+                            )
+                            cameraImageUri.value = uri
+                            cameraLauncher.launch(uri)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.PhotoCamera,
+                        contentDescription = "Camera",
+                        tint = Color.Black
+                    )
                 }
             }
         }
