@@ -65,7 +65,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier) {
             route = "product_detail/{id}"
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
-            ProductDetailScreen(navController = navController, id = id, auth = auth)
+            ProductDetailScreen(navController = navController, id = id)
         }
 
         composable("profile_detail") { ProfileDetailScreen(modifier, navController, auth) }
