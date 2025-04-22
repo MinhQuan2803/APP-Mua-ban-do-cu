@@ -1,5 +1,6 @@
 package com.example.appmuabandocu.core.navigation
 
+import ProductViewModel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,13 +30,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
-import com.example.appmuabandocu.feature_favorite.ui.TincuabanScreen
+import com.example.appmuabandocu.feature_favorite.ui.FavoriteScreen
 import com.example.appmuabandocu.feature_home.ui.HomeScreen
 import com.example.appmuabandocu.feature_mxh.ui.MxhScreen
 import com.example.appmuabandocu.feature_profile.ui.ProfileScreen
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
-
+import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 
 data class NavItem(val route: String, val icon: Int, val label: String)
 
@@ -110,14 +111,10 @@ fun ContentScreen(
             auth = auth,  // Truyền FirebaseAuth
             navController = navController
         )
-        3 -> TincuabanScreen(
-            auth = auth,  // Truyền FirebaseAuth
-            onSignIn = { navController.navigate("login_screen") }, // Điều hướng đến login khi đăng nhập
-            onSignOut = {
-                auth.signOut()  // Đăng xuất khỏi Firebase
-                navController.navigate("login_screen")  // Điều hướng về login
-            },
-            navController = navController
+        3 -> FavoriteScreen(
+            navController = navController,
+            viewModel = ProductViewModel(),
+            favoriteViewModel = FavoriteViewModel()
         )
         4 -> ProfileScreen(
             auth = auth,  // Truyền FirebaseAuth
@@ -130,5 +127,3 @@ fun ContentScreen(
         )
     }
 }
-
-

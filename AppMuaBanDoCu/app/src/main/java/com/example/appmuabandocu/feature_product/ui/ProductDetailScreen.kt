@@ -2,8 +2,6 @@ package com.example.appmuabandocu.feature_product.ui
 
 import ProductViewModel
 import android.content.Intent
-import android.location.Criteria
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +53,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.auth.FirebaseAuth
@@ -64,15 +65,21 @@ import java.util.Locale
 import androidx.core.net.toUri
 import com.example.appmuabandocu.feature_mxh.ui.formatPrice
 
+import com.example.appmuabandocu.viewmodel.FavoriteViewModel
+
 @Composable
 fun ProductDetailScreen(
     navController: NavController,
     id: String,
-    viewModel: ProductViewModel = viewModel()
+    viewModel: ProductViewModel = viewModel(),
+    favoriteViewModel: FavoriteViewModel = viewModel(),
 ) {
     val product = viewModel.productList.find { it.id == id }
     val context = LocalContext.current
     val phoneNumber = product?.numberUser
+
+    val favoriteViewModel: FavoriteViewModel = viewModel()
+    val favoriteIds = favoriteViewModel.favoriteProductIds.collectAsState()
 
     val formattedTime = remember(product?.timestamp) {
         val date = Date(product?.timestamp ?: 0)
@@ -120,11 +127,12 @@ fun ProductDetailScreen(
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = {favoriteViewModel.toggleFavorite(product.id) }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_traitim),
-                                modifier = Modifier.size(35.dp),
-                                contentDescription = "more"
+                                imageVector = if (favoriteIds.value.contains(product.id))
+                                    Icons.Default.Favorite else
+                                    Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorite"
                             )
                         }
                     }
@@ -308,4 +316,3 @@ fun InfoRow(label: String, value: String) {
     }
     Spacer(modifier = Modifier.height(6.dp))
 }
-

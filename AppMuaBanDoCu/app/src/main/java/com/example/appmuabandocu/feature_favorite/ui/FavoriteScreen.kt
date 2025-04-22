@@ -1,10 +1,18 @@
 package com.example.appmuabandocu.feature_favorite.ui
 
+import ProductViewModel
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,19 +27,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.feature_home.ui.formatPrice
 import com.example.appmuabandocu.ui.theme.Blue_text
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-@Composable
-fun TincuabanScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Unit,navController: NavController) {
-    val context = LocalContext.current
-    val user = auth.currentUser
+import com.example.appmuabandocu.viewmodel.FavoriteViewModel
+import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 
+@Composable
+fun FavoriteScreen(
+    navController: NavController,
+    viewModel: ProductViewModel,
+    favoriteViewModel: FavoriteViewModel
+) {
+    // Collect danh sách các productId yêu thích
+    val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
+
+    // Lọc các sản phẩm yêu thích từ danh sách tất cả sản phẩm
+    val favoriteProducts = viewModel.productList.filter { product ->
+        favoriteProductIds.contains(product.id)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,7 +59,7 @@ fun TincuabanScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> U
     ) {
         Spacer(modifier = Modifier.padding(16.dp))
         Text(
-            text = "Bài viết của bạn ",
+            text = "Mặt hàng đang lưu",
             modifier = Modifier.padding(bottom = 16.dp),
             fontWeight = Bold,
             fontSize = 30.sp,
@@ -51,70 +70,64 @@ fun TincuabanScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> U
             thickness = 1.dp,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (user == null) {
-            navController.navigate("login_screen")
-        } else {
-            // Hiển thị giao diện khi đã đăng nhập
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(user.photoUrl),
-                    contentDescription = "Ảnh đại diện",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = user.displayName ?: "Người dùng",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = user.email ?: "",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                ProfileOption("Tổng số bài viết") { Toast.makeText(context, "Mở thông tin cá nhân", Toast.LENGTH_SHORT).show() }
-                ProfileOption("Đang đăng") { Toast.makeText(context, "Mở quản lý mặt hàng", Toast.LENGTH_SHORT).show() }
-                ProfileOption("Đã xoá") { Toast.makeText(context, "Mở liên hệ", Toast.LENGTH_SHORT).show() }
-                Spacer(modifier = Modifier.height(16.dp))
-
-
+        // Hiển thị sản phẩm yêu thích
+        LazyColumn {
+            items(favoriteProducts.size) { product ->
+                ProductItem(product = favoriteProducts[product], viewModel = favoriteViewModel)
             }
         }
+
     }
 }
 
 @Composable
-fun ProfileOption(title: String, onClick: () -> Unit) {
-    Row(
+fun ProductItem(product: Product, viewModel: FavoriteViewModel) {
+    val favoriteViewModel: FavoriteViewModel = viewModel()
+    val favoriteIds = favoriteViewModel.favoriteProductIds.collectAsState()
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(8.dp),
+        shape = RoundedCornerShape(8.dp),
     ) {
-        Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-        Icon(painterResource(id = R.drawable.ic_next), contentDescription = "Next")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Hình ảnh sản phẩm
+            AsyncImage(
+                model = product.imageUrl.replace("http://", "https://"),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(60.dp)
+                    .padding(end = 16.dp),
+                placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
+                error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
+            )
+
+
+            // Chi tiết sản phẩm
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = product.productName, style = androidx.compose.material.MaterialTheme.typography.h6)
+                Text(text = formatPrice(product.price), style = androidx.compose.material.MaterialTheme.typography.body2)
+                Text(text = "Địa chỉ: ${product.address}", style = MaterialTheme.typography.body2)
+            }
+
+
+            IconButton(onClick = {favoriteViewModel.toggleFavorite(product.id) }) {
+                androidx.compose.material3.Icon(
+                    imageVector = if (favoriteIds.value.contains(product.id))
+                        Icons.Default.Favorite else
+                        Icons.Default.FavoriteBorder,
+                    contentDescription = "Favorite"
+                )
+            }
+        }
     }
 }
