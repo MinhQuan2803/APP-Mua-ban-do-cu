@@ -129,7 +129,10 @@ fun HomeScreen(modifier: Modifier = Modifier,
                         unfocusedIndicatorColor = Blue_text,
                         unfocusedContainerColor = Color.White,
                     ),
-                    modifier = Modifier.height(50.dp).weight(1f)
+                    modifier = Modifier.height(56.dp)
+                        .weight(1f),
+
+
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 IconButton(
