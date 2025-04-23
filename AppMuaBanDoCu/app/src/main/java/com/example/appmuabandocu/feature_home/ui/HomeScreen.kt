@@ -285,7 +285,8 @@ fun ProductItem(
                 text = product.productName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                maxLines = 2
+                maxLines = 2,
+                color = Color.Black
             )
 
 

@@ -135,7 +135,6 @@ fun ProductItem(
 
             IconButton(
                 onClick = { viewModel.toggleFavorite(product.id) },
-                enabled = false // Vô hiệu hóa onClick
             ) {
                 Icon(
                     imageVector = if (favoriteIds.value.contains(product.id))
