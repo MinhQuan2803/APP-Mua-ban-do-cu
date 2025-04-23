@@ -95,6 +95,9 @@ fun MxhScreen(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshProducts() }
     )
+
+    val sortedSearchResults = searchResults.sortedByDescending { it.timestamp }
+
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("mxhScreen", "Sản phẩm: ${products.size} sản phẩm")
@@ -179,15 +182,14 @@ fun MxhScreen(
                     .pullRefresh(pullRefreshState)
                     .fillMaxWidth()
             ){
-                LazyColumn(
-                ) {
-                    items(searchResults.size) { index ->
+                LazyColumn {
+                    items(sortedSearchResults.size) { index ->
                         ProductItemMXH(
-                            product1 = searchResults[index],
+                            product1 = sortedSearchResults[index],
                             navController = navController,
                             toggleProductVisibility = {
                                 viewModel.toggleProductVisibility(
-                                    searchResults[index].id
+                                    sortedSearchResults[index].id
                                 )
                             }
                         )

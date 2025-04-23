@@ -452,5 +452,6 @@ fun AddProductScreen(
                 Text("Đăng", fontSize = 20.sp, color = Color.White)
             }
         }
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }

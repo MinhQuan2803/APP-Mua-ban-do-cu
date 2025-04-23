@@ -59,9 +59,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
 ) {
 
-
     val products = viewModel.getVisibleProducts()
-
 
     val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
@@ -75,6 +73,9 @@ fun HomeScreen(modifier: Modifier = Modifier,
 
     // Kết quả cuối cùng cần hiển thị (ưu tiên kết quả tìm kiếm nếu có)
     val displayProducts = if (query.isNotBlank()) searchResults else filteredProducts
+
+    val sortedProducts = displayProducts.sortedByDescending { it.timestamp }
+
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
@@ -190,7 +191,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
                         columns = GridCells.Fixed(2), // Chia 2 cột
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        items(displayProducts) { product ->
+                        items(sortedProducts) { product ->
                             ProductItem(
                                 product = product,
                                 navController = navController,
