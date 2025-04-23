@@ -25,6 +25,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,19 +46,18 @@ fun FavoriteScreen(
     viewModel: ProductViewModel,
     favoriteViewModel: FavoriteViewModel
 ) {
-    // Collect danh sách các productId yêu thích
     val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
 
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
 
-    // Lọc các sản phẩm yêu thích từ danh sách tất cả sản phẩm
     val favoriteProducts = viewModel.productList.filter { product ->
         favoriteProductIds.contains(product.id)
     }
     if (user == null) {
         navController.navigate("login_screen")
     } else {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -79,17 +79,54 @@ fun FavoriteScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Hiển thị sản phẩm yêu thích
-            LazyColumn {
-                items(favoriteProducts.size) { product ->
-                    ProductItem(
-                        navController = navController,
-                        product = favoriteProducts[product],
-                        viewModel = favoriteViewModel
-                    )
+            if (
+                favoriteProducts.isEmpty()
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp), // Bo góc
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.LightGray)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_empty_task),
+                            contentDescription = "No Tasks",
+                            modifier = Modifier.size(100.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Không có sản phẩm yêu thích nào",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
                 }
             }
+            else {
 
+                // Hiển thị sản phẩm yêu thích
+                LazyColumn {
+                    items(favoriteProducts.size) { product ->
+                        ProductItem(
+                            navController = navController,
+                            product = favoriteProducts[product],
+                            viewModel = favoriteViewModel
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -98,7 +135,7 @@ fun FavoriteScreen(
 fun ProductItem(
     product: Product,
     viewModel: FavoriteViewModel,
-    navController: NavController // truyền NavController
+    navController: NavController
 ) {
     val favoriteIds = viewModel.favoriteProductIds.collectAsState()
 
