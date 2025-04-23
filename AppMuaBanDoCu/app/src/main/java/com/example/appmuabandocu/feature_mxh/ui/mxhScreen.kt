@@ -58,6 +58,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,91 +88,92 @@ fun MxhScreen(
     searchViewModel: SearchProductViewModel = viewModel()
 ){
     val products = viewModel.getVisibleProducts()
-
-
     val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
-
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refreshProducts() }
     )
-
-
     // Log để kiểm tra danh sách sản phẩm
     LaunchedEffect(products) {
         Log.d("mxhScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
-
     Box(
         modifier = modifier.fillMaxSize()
     ){
         Column(
         ){
             Box(
-                modifier = Modifier.fillMaxWidth()
-                    .height(140.dp)
-                    .background(Blue_text),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Blue_text)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 10.dp),
+                    horizontalAlignment = Alignment.Start // Canh trái
+                ) {
+                    Text(
+                        text = "Thanh lý nhanh",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
 
-
-                contentAlignment = Alignment.Center
-            ){
-                Spacer(modifier = Modifier.height(30.dp))
-                Box {
-                    Row (
-                    ){
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         OutlinedTextField(
                             value = query,
                             onValueChange = {
                                 query = it
                                 searchViewModel.searchProducts(it)
                             },
-                            shape = RoundedCornerShape(10.dp),
-                            placeholder = { Text("Bạn muốn mua gì ?") },
+                            shape = RoundedCornerShape(12.dp),
+                            placeholder = {
+                                Text(
+                                    text = "Bạn muốn mua gì?",
+                                    fontSize = 14.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
                             colors = TextFieldDefaults.colors(
                                 focusedTextColor = Color.Black,
-                                //focusedContainerColor = Color.White,
                                 focusedIndicatorColor = Blue_text,
                                 unfocusedIndicatorColor = Blue_text,
-                                unfocusedContainerColor = Color(0xFFEEEEEE),
+                                unfocusedContainerColor = Color(0xFFF5F5F5),
+                                focusedContainerColor = Color(0xFFF5F5F5)
                             ),
-                            modifier = Modifier.fillMaxWidth(0.7f)
-                                .height(50.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        IconButton(
                             modifier = Modifier
-                                .border(2.dp , Color.White, RoundedCornerShape(10.dp)),
-                            onClick = { }
-                        ){
-                            Image(
-                                Icons.Default.Search,
+                                .weight(1f)
+                                .height(60.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        IconButton(
+                            onClick = { /* TODO: Tìm kiếm */ },
+                            modifier = Modifier
+                                .size(52.dp)
+                                .background(Color.White, RoundedCornerShape(12.dp))
+                                .border(1.dp, Blue_text, RoundedCornerShape(12.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
                                 contentDescription = "Search",
-                                modifier = Modifier.size(40.dp)
+                                tint = Blue_text,
+                                modifier = Modifier.size(28.dp)
                             )
                         }
                     }
                 }
             }
-//            Box(
-//                modifier = Modifier.fillMaxWidth(),
-//                contentAlignment = Alignment.Center
-//            ){
-//                val categories = listOf("TV", "Laptop", "Điện thoại", "camera cũ", "Tủ lạnh")
-//                Row(modifier = Modifier.padding(8.dp)) {
-//                    categories.forEach { category ->
-//                        Box(
-//                            modifier = Modifier
-//                                .padding(4.dp)
-//                                .background(Color.LightGray, RoundedCornerShape(8.dp))
-//                                .padding(8.dp)
-//                        ) {
-//                            Text(category, fontWeight = FontWeight.Bold)
-//                        }
-//                    }
-//                }
-//            }
+
             Box(
                 Modifier
                     .pullRefresh(pullRefreshState)
@@ -202,15 +204,7 @@ fun MxhScreen(
     }
 
     Spacer(modifier = Modifier.height(200.dp))
-
-
 }
-
-
-
-
-
-
 @Composable
 fun ProductItemMXH(
     product1: Product,
