@@ -28,9 +28,11 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import androidx.compose.ui.res.colorResource
 import com.example.appmuabandocu.ui.theme.Black
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController) {
+    val user = FirebaseAuth.getInstance().currentUser
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -102,7 +104,13 @@ fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController
                     ),
                     border = BorderStroke(1.dp, Blue_text),
                     shape = ButtonDefaults.outlinedShape,
-                    onClick = { navController.navigate("homeNav") }
+                    onClick = {
+                        if (user != null) {
+                            navController.navigate("homeNav")
+                        } else {
+                            navController.navigate("login_screen")
+                        }
+                    }
                 ){
                     Text(text = "Bắt đầu ngay", fontSize = 24.sp,
                         fontWeight = Bold,
@@ -114,4 +122,7 @@ fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController
 
     }
 
+}
+fun isUserLoggedIn(): Boolean {
+    return FirebaseAuth.getInstance().currentUser != null
 }

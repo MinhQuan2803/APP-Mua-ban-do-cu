@@ -98,11 +98,19 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
                 ProfileOption("Quản lý bài viết") { navController.navigate("profile_manage_screen") }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = onSignOut,
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mauchinh))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Đăng xuất", color = Color.Black)
+                    Button(
+                        onClick = onSignOut,
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mauchinh)),
+                        modifier = Modifier.height(50.dp)
+                            .width(150.dp)
+                    ) {
+                        Text(text = "Đăng xuất", color = Color.Black)
+                    }
+
                 }
             }
         }
