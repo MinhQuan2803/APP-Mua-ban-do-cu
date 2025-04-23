@@ -37,6 +37,7 @@ import com.example.appmuabandocu.feature_home.ui.formatPrice
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ManageProductViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun FavoriteScreen(
@@ -47,38 +48,49 @@ fun FavoriteScreen(
     // Collect danh sách các productId yêu thích
     val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
 
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+
     // Lọc các sản phẩm yêu thích từ danh sách tất cả sản phẩm
     val favoriteProducts = viewModel.productList.filter { product ->
         favoriteProductIds.contains(product.id)
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.padding(16.dp))
-        Text(
-            text = "Bài viết yêu thích",
-            modifier = Modifier.padding(bottom = 16.dp),
-            fontWeight = Bold,
-            fontSize = 30.sp,
-            color = Blue_text
-        )
-        Divider(
-            color = Blue_text,
-            thickness = 1.dp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+    if (user == null) {
+        navController.navigate("login_screen")
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.padding(16.dp))
+            Text(
+                text = "Bài viết yêu thích",
+                modifier = Modifier.padding(bottom = 16.dp),
+                fontWeight = Bold,
+                fontSize = 30.sp,
+                color = Blue_text
+            )
+            Divider(
+                color = Blue_text,
+                thickness = 1.dp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Hiển thị sản phẩm yêu thích
-        LazyColumn {
-            items(favoriteProducts.size) { product ->
-                ProductItem(navController = navController, product = favoriteProducts[product], viewModel = favoriteViewModel)
+            // Hiển thị sản phẩm yêu thích
+            LazyColumn {
+                items(favoriteProducts.size) { product ->
+                    ProductItem(
+                        navController = navController,
+                        product = favoriteProducts[product],
+                        viewModel = favoriteViewModel
+                    )
+                }
             }
-        }
 
+        }
     }
 }
 
