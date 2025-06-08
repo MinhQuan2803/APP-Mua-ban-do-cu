@@ -1,6 +1,6 @@
 package com.example.appmuabandocu.feature_favorite.ui
 
-import ProductViewModel
+
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,6 +38,7 @@ import com.example.appmuabandocu.feature_home.ui.formatPrice
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ManageProductViewModel
+import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable

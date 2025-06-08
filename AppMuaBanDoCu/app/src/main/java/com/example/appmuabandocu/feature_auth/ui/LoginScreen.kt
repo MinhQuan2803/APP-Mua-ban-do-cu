@@ -49,33 +49,54 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import com.example.appmuabandocu.feature_auth.SignInState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmuabandocu.feature_auth.AuthViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    state: SignInState,
-    onSignInClick: () -> Unit,
+    authViewModel: AuthViewModel = viewModel(),
     navController: NavController,
     ) {
-
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = state.signInError) {
-        state.signInError?.let { error ->
-            Toast.makeText(
-                context,
-                error,
-                Toast.LENGTH_LONG
-            ).show()
+    val email by authViewModel.email.collectAsState()
+    val password by authViewModel.password.collectAsState()
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val googleSignOptions = authViewModel.getGoogleSignInOptions(context)
+    val googleSignInClient = GoogleSignIn.getClient(context, googleSignOptions)
+
+    // tự động đăng nhập nếu đã có tài khoản
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            navController.navigate("homeNav") {
+                popUpTo("login_screen") { inclusive = true }
+            }
         }
     }
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+            if (account != null) {
+                // Sign in with Google
+                authViewModel.signInWithGoogle(account, context)
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(context, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -102,79 +123,71 @@ fun LoginScreen(
                     color = Blue_text,
                 )
 
-//                OutlinedTextField(
-//                    value = email,
-//                    onValueChange = { email = it },
-//                    label = { Text(text = "Email") },
-//                    colors = TextFieldDefaults.colors(
-//                        focusedTextColor = Color.Black,
-//                        focusedIndicatorColor = Blue_text,
-//                        unfocusedIndicatorColor = Blue_text,
-//                        unfocusedContainerColor = Color.White,
-//                        unfocusedTextColor = Color.Black
-//                    )
-//                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { authViewModel.setEmail(it) },
+                    label = { Text(text = "Email") },
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        focusedIndicatorColor = Blue_text,
+                        unfocusedIndicatorColor = Blue_text,
+                        unfocusedContainerColor = Color.White,
+                        unfocusedTextColor = Color.Black
+                    )
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-//                OutlinedTextField(
-//                    value = password,
-//                    onValueChange = { password = it },
-//                    label = { Text(text = "Password") },
-//                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-//                    trailingIcon = {
-//                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-//                            Icon(
-//                                imageVector = if (passwordVisible)
-//                                    Icons.Filled.VisibilityOff
-//                                else
-//                                    Icons.Filled.Visibility,
-//                                contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
-//                            )
-//                        }
-//                    },
-//                    colors = TextFieldDefaults.colors(
-//                        focusedTextColor = Color.Black,
-//                        focusedIndicatorColor = Blue_text,
-//                        unfocusedIndicatorColor = Blue_text,
-//                        unfocusedContainerColor = Color.White,
-//                        unfocusedTextColor = Color.Black
-//                    )
-//                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { authViewModel.setPassword(it) },
+                    label = { Text(text = "Password") },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible)
+                                    Icons.Filled.VisibilityOff
+                                else
+                                    Icons.Filled.Visibility,
+                                contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
+                            )
+                        }
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        focusedIndicatorColor = Blue_text,
+                        unfocusedIndicatorColor = Blue_text,
+                        unfocusedContainerColor = Color.White,
+                        unfocusedTextColor = Color.Black
+                    )
+                )
 
-//                TextButton(
-//                    onClick = { navController.navigate("homeNav") },
-//                    modifier = Modifier.align(Alignment.End)
-//                ) {
-//                    Text(text = "Quên mật khẩu", fontSize = 16.sp, color = Blue_text)
-//                }
-//
-//                Button(
-//                    onClick = {
-//                        auth.signInWithEmailAndPassword(email, password)
-//                            .addOnCompleteListener { task ->
-//                                if (task.isSuccessful) {
-//                                    Toast.makeText(context, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
-//                                    navController.navigate("homeNav") // Điều hướng sau khi đăng nhập thành công
-//                                } else {
-//                                    Toast.makeText(context, "Đăng nhập thất bại!", Toast.LENGTH_SHORT).show()
-//                                }
-//                            }
-//                    },
-//                    modifier = Modifier
-//                        .align(Alignment.CenterHorizontally)
-//                        .width(250.dp),
-//                    colors = ButtonDefaults.buttonColors(
-//                        containerColor = Blue_text,
-//                        contentColor = Color.White
-//                    )
-//                ) {
-//                    Text(text = "Đăng nhập")
-//                }
+                TextButton(
+                    onClick = { navController.navigate("homeNav") },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(text = "Quên mật khẩu", fontSize = 16.sp, color = Blue_text)
+                }
 
-//                TextButton(onClick = { navController.navigate("register_main_screen") }) {
-//                    Text(text = "Chưa có tài khoản ? Đăng ký ngay")
-//                }
+                Button(
+                    onClick = {
+                        authViewModel.signInWithEmailPassword(context)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(250.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Blue_text,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(text = "Đăng nhập")
+                }
+
+                TextButton(onClick = { navController.navigate("register_screen") }) {
+                    Text(text = "Chưa có tài khoản ? Đăng ký ngay")
+                }
 
 
 //                Text(text = "OR", fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -183,7 +196,10 @@ fun LoginScreen(
 
                 // Social Media Icons
                 Button(
-                    onClick = onSignInClick,
+                    onClick = {
+                        val signInIntent = googleSignInClient.signInIntent
+                        googleSignInLauncher.launch(signInIntent)
+                    } ,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                         .width(300.dp)
                         .height(60.dp),

@@ -1,5 +1,5 @@
 package com.example.appmuabandocu.feature_home.ui
-import ProductViewModel
+
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,6 +45,7 @@ import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 
 
@@ -53,13 +54,13 @@ import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier,
                navController: NavController,
-               viewModel: ProductViewModel = viewModel(),
+               productViewModel: ProductViewModel = viewModel(),
                searchViewModel: SearchProductViewModel = viewModel()
 
 
 ) {
 
-    val products = viewModel.getVisibleProducts()
+    val products = productViewModel.getVisibleProducts()
 
     val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
@@ -195,7 +196,7 @@ fun HomeScreen(modifier: Modifier = Modifier,
                             ProductItem(
                                 product = product,
                                 navController = navController,
-                                toggleProductVisibility = { viewModel.toggleProductVisibility(product.id) }
+                                toggleProductVisibility = { productViewModel.toggleProductVisibility(product.id) }
                             )
                         }
                     }

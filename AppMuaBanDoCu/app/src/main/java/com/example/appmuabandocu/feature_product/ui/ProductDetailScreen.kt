@@ -1,6 +1,5 @@
 package com.example.appmuabandocu.feature_product.ui
 
-import ProductViewModel
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,6 +59,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
+import com.example.appmuabandocu.viewmodel.ProductViewModel
 import kotlin.math.roundToInt
 @Composable
 fun ProductDetailScreen(

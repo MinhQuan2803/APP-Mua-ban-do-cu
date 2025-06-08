@@ -1,6 +1,5 @@
 package com.example.appmuabandocu.feature_add_product.ui
 
-import ProductViewModel
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -45,6 +44,7 @@ import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
 import com.example.appmuabandocu.feature_product.ui.AddressInput
 import com.example.appmuabandocu.ui.theme.Blue_text
+import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

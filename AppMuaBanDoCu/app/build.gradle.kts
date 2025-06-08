@@ -59,9 +59,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation ("com.cloudinary:kotlin-url-gen:1.7.0")
     implementation ("com.google.firebase:firebase-storage-ktx:20.3.0")
-    implementation("com.google.firebase:firebase-firestore-ktx:25.1.3")
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("androidx.credentials:credentials:1.5.0")
@@ -69,7 +69,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation ("androidx.compose.ui:ui:1.5.0")
-    implementation ("androidx.compose.material:material:1.5.0")
     implementation ("androidx.compose.ui:ui-tooling-preview:1.5.0")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
@@ -84,13 +83,13 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.2.0")
     implementation ("androidx.navigation:navigation-compose:2.7.5")
 
-    implementation ("com.google.firebase:firebase-database:20.1.0")// Add this line for Realtime Database
+    implementation (libs.firebase.database)// Add this line for Realtime Database
     implementation ("com.google.firebase:firebase-auth:21.1.0")
     implementation ("com.google.firebase:firebase-appcheck-playintegrity:17.1.2") // Or the latest version
 
-    debugImplementation ("com.google.firebase:firebase-appcheck-debug:17.1.2")
+    debugImplementation (libs.firebase.appcheck.debug)
 
-    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
+    implementation (libs.firebase.database.ktx)
 
     implementation ("androidx.compose.material:material-icons-core:1.5.0")
     implementation ("androidx.compose.material:material-icons-extended:1.5.0")
@@ -101,6 +100,10 @@ dependencies {
     //lấy api nè
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Firebase restore
+    implementation(libs.google.firebase.firestore.ktx)
+
 
 
 }
