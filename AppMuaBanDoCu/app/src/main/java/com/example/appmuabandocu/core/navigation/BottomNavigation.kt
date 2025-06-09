@@ -42,12 +42,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.draw.scale
 
-sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
+sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String, val requiresLogin: Boolean = false) {
     object Home : BottomNavItem("homeNav", Icons.Default.Home, "Trang chủ")
     object HomeMxh : BottomNavItem("home_mxh", Icons.Default.Home, "Dạo chợ")
-    object Add : BottomNavItem("category_screen", Icons.Default.Add, "Đăng bán")
-    object Favorite : BottomNavItem("favorite_screen", Icons.Default.Favorite, "Yêu thích")
-    object Profile : BottomNavItem("profile_screen", Icons.Default.Person, "Cá nhân")
+    object Add : BottomNavItem("category_screen", Icons.Default.Add, "Đăng bán", true)
+    object Favorite : BottomNavItem("favorite_screen", Icons.Default.Favorite, "Yêu thích", true)
+    object Profile : BottomNavItem("profile_screen", Icons.Default.Person, "Cá nhân", true)
 }
 
 // Routes that should hide the bottom nav
@@ -60,6 +60,8 @@ val routesWithoutBottomNav = listOf(
 @Composable
 fun BottomNavigation(
     navController: NavController,
+    isUserLoggedIn: Boolean = false,
+    onRequireLogin: (String) -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val items = listOf(
@@ -132,8 +134,12 @@ fun BottomNavigation(
                             label = { Text(item.label) },
                             selected = selected,
                             onClick = {
-                                if (currentDestination?.route != item.route) {
-                                    // Thêm xử lý animation khi chuyển tab
+                                if (item.requiresLogin && !isUserLoggedIn) {
+                                    // Nếu tab yêu cầu đăng nhập và người dùng chưa đăng nhập
+                                    // thì chuyển đến màn hình đăng nhập
+                                    onRequireLogin(item.route)
+                                } else if (currentDestination?.route != item.route) {
+                                    // Chuyển đến tab được chọn
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
                                             saveState = true

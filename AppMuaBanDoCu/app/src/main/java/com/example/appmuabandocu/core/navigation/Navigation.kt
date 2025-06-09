@@ -1,12 +1,10 @@
 package com.example.appmuabandocu.core.navigation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,7 +12,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -43,6 +40,29 @@ import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+// Tạo một StateFlow để theo dõi trạng thái đăng nhập
+private val _authStateFlow = MutableStateFlow(FirebaseAuth.getInstance().currentUser != null)
+val authStateFlow: StateFlow<Boolean> = _authStateFlow.asStateFlow()
+
+// Hàm cập nhật trạng thái đăng nhập
+fun updateAuthState() {
+    _authStateFlow.value = FirebaseAuth.getInstance().currentUser != null
+}
+
+// T����o đối tượng AuthStateManager để quản lý trạng th��i đăng nhập
+object AuthStateManager {
+    init {
+        FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
+            updateAuthState()
+        }
+    }
+}
+
 
 // Danh sách các route chính hiển thị bottom navigation
 val mainTabRoutes = listOf(
@@ -72,23 +92,19 @@ fun Navigation(
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
 
-    // Kiểm tra trạng thái đăng nhập
+    // Kiểm tra trạng thái đăng nhập từ StateFlow
+    val isUserLoggedIn by authStateFlow.collectAsState()
+
+    // Cập nhật trạng thái đăng nhập khi component được t���o
+    LaunchedEffect(Unit) {
+        updateAuthState()
+    }
+
+    // Kiểm tra trạng thái đăng nhập khi component được recompose
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
-    // Kiểm tra xem người dùng đã đăng nhập chưa
-    val isUserLoggedIn = remember(auth.currentUser) {
-        auth.currentUser != null
-    }
-
-    // Kiểm tra xem route hiện tại có phải là một trong các route chính không
-    val isMainTab = remember(currentRoute) {
-        mainTabRoutes.any { route ->
-            currentRoute == route
-        }
-    }
-
-    // Sử dụng NavHost duy nhất cho tất cả màn hình
+    // S�� dụng NavHost duy nhất cho tất cả màn hình
     NavHost(
         navController = navController,
         startDestination = "splash_screen"
@@ -154,69 +170,69 @@ fun Navigation(
         }
 
         composable("favorite_screen") {
-            // Kiểm tra đăng nhập trước khi truy cập tab Yêu thích
-            LaunchedEffect(Unit) {
+            // Kiểm tra đăng nhập trước khi truy cập tab Yêu thích và thêm delay nhỏ
+            LaunchedEffect(isUserLoggedIn) {
+                // Thêm một delay nhỏ để đảm bảo trạng thái đăng nhập đã được cập nhật
+                delay(100)
                 if (!isUserLoggedIn) {
                     lastTab = "favorite_screen"
                     navController.navigate("login_screen")
                 }
             }
 
-            if (isUserLoggedIn) {
-                MainScreenWithBottomNav(
-                    navController = navController,
-                    auth = auth,
-                    context = context,
-                    authViewModel = authViewModel,
-                    modifier = modifier,
-                    selectedTab = "favorite_screen",
-                    isUserLoggedIn = isUserLoggedIn
-                )
-            }
+            MainScreenWithBottomNav(
+                navController = navController,
+                auth = auth,
+                context = context,
+                authViewModel = authViewModel,
+                modifier = modifier,
+                selectedTab = "favorite_screen",
+                isUserLoggedIn = isUserLoggedIn
+            )
         }
 
         composable("category_screen") {
-            // Kiểm tra đăng nhập trước khi truy cập tab Đăng bán
-            LaunchedEffect(Unit) {
+            // Kiểm tra đăng nhập trước khi truy c���p tab Đăng bán và thêm delay nhỏ
+            LaunchedEffect(isUserLoggedIn) {
+                // Thêm một delay nhỏ để đảm bảo trạng thái đăng nhập đã được cập nhật
+                delay(100)
                 if (!isUserLoggedIn) {
                     lastTab = "category_screen"
                     navController.navigate("login_screen")
                 }
             }
 
-            if (isUserLoggedIn) {
-                MainScreenWithBottomNav(
-                    navController = navController,
-                    auth = auth,
-                    context = context,
-                    authViewModel = authViewModel,
-                    modifier = modifier,
-                    selectedTab = "category_screen",
-                    isUserLoggedIn = isUserLoggedIn
-                )
-            }
+            MainScreenWithBottomNav(
+                navController = navController,
+                auth = auth,
+                context = context,
+                authViewModel = authViewModel,
+                modifier = modifier,
+                selectedTab = "category_screen",
+                isUserLoggedIn = isUserLoggedIn
+            )
         }
 
         composable("profile_screen") {
-            // Kiểm tra đăng nhập trước khi truy cập tab Cá nhân
-            LaunchedEffect(Unit) {
+            // Ki��m tra đăng nhập trước khi truy cập tab Cá nhân và thêm delay nhỏ
+            LaunchedEffect(isUserLoggedIn) {
+                // Thêm một delay nhỏ để đảm bảo trạng thái đăng nhập đã được cập nhật
+                delay(100)
                 if (!isUserLoggedIn) {
                     lastTab = "profile_screen"
                     navController.navigate("login_screen")
                 }
             }
 
-            if (isUserLoggedIn) {
-                MainScreenWithBottomNav(
-                    navController = navController,
-                    auth = auth,
-                    context = context,
-                    authViewModel = authViewModel,
-                    modifier = modifier,
-                    selectedTab = "profile_screen",
-                    isUserLoggedIn = isUserLoggedIn
-                )
-            }
+            MainScreenWithBottomNav(
+                navController = navController,
+                auth = auth,
+                context = context,
+                authViewModel = authViewModel,
+                modifier = modifier,
+                selectedTab = "profile_screen",
+                isUserLoggedIn = isUserLoggedIn
+            )
         }
 
         // Các màn hình chi tiết
@@ -289,3 +305,65 @@ fun MainScreenWithBottomNav(
     }
 }
 
+@Composable
+fun NavHostContainer(
+    selectedTab: String,
+    navController: NavController,
+    auth: FirebaseAuth,
+    context: android.content.Context,
+    authViewModel: AuthViewModel,
+    modifier: Modifier,
+    productViewModel: ProductViewModel,
+    searchViewModel: SearchProductViewModel,
+    favoriteViewModel: FavoriteViewModel
+) {
+    // Sử dụng Crossfade để tạo hiệu ứng chuyển đổi mượt mà
+    Crossfade(
+        targetState = selectedTab,
+        animationSpec = tween(150)
+    ) { currentTab ->
+        when (currentTab) {
+            "homeNav" -> {
+                HomeScreen(
+                    modifier = modifier,
+                    navController = navController,
+                    productViewModel = productViewModel,
+                    searchViewModel = searchViewModel
+                )
+            }
+            "home_mxh" -> {
+                MxhScreen(
+                    modifier = modifier,
+                    navController = navController,
+                    productViewModel = productViewModel,
+                    searchViewModel = searchViewModel
+                )
+            }
+            "favorite_screen" -> {
+                FavoriteScreen(
+                    navController = navController,
+                    viewModel = productViewModel,
+                    favoriteViewModel = favoriteViewModel
+                )
+            }
+            "category_screen" -> {
+                CategoryScreen(
+                    auth = auth,
+                    navController = navController
+                )
+            }
+            "profile_screen" -> {
+                ProfileScreen(
+                    auth = auth,
+                    onSignOut = {
+                        authViewModel.signOut(context)
+                        navController.navigate("login_screen"){
+                            popUpTo("homeNav") { inclusive = true }
+                        }
+                    },
+                    navController = navController,
+                )
+            }
+        }
+    }
+}

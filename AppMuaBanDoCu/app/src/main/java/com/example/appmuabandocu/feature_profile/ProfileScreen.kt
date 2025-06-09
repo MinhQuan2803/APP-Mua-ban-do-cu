@@ -33,18 +33,17 @@ fun ProfileScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     val user = auth.currentUser
-    val userData by profileViewModel.userData.collectAsState()
     val avatarUrl by profileViewModel.avatarUrl.collectAsState()
 
     LaunchedEffect(key1 = user) {
         if (user == null) {
             navController.navigate("login_screen") {
-                popUpTo("profile_screen") { inclusive = true }
+                popUpTo("homeNav") { inclusive = true }
             }
         }
     }
+
 
     Column(
         modifier = Modifier
@@ -67,9 +66,6 @@ fun ProfileScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Sử dụng LaunchedEffect để điều hướng một lần khi user == null
-
 
         if (user != null) {
             // Hiển thị giao diện khi đã đăng nhập

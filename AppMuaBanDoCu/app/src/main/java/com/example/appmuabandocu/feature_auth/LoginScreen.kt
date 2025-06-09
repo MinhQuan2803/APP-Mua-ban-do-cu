@@ -54,6 +54,7 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel = viewModel(),
     navController: NavController,
+    onBack: () -> Unit = {}
     ) {
     val context = LocalContext.current
 
