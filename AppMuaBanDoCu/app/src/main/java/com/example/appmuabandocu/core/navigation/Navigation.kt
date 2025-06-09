@@ -357,9 +357,7 @@ fun NavHostContainer(
                     auth = auth,
                     onSignOut = {
                         authViewModel.signOut(context)
-                        navController.navigate("login_screen"){
-                            popUpTo("homeNav") { inclusive = true }
-                        }
+                        navController.navigate("login_screen")
                     },
                     navController = navController,
                 )

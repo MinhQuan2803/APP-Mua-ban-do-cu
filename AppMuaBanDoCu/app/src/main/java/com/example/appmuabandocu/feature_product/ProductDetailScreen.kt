@@ -33,7 +33,6 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.R
-import com.example.appmuabandocu.data.Product
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
@@ -52,6 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 
 @Composable

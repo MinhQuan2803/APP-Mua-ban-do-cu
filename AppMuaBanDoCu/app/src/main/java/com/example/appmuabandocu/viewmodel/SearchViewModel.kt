@@ -3,7 +3,7 @@ package com.example.appmuabandocu.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.model.Product
 import com.google.firebase.database.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

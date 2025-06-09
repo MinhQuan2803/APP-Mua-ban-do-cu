@@ -1,4 +1,4 @@
-package com.example.appmuabandocu.data
+package com.example.appmuabandocu.model
 
 data class User(
     val uid: String = "",

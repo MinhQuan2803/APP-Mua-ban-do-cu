@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 
@@ -21,7 +22,9 @@ suspend fun uploadImageToCloudinary(context: Context, uri: Uri): String? {
 
             val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("file", file.name, RequestBody.create("image/*".toMediaTypeOrNull(), file))
+                .addFormDataPart("file", file.name,
+                    file.asRequestBody("image/*".toMediaTypeOrNull())
+                )
                 .addFormDataPart("upload_preset", "unsigned_upload") // Thay bằng preset thật
                 .build()
 

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appmuabandocu.api.ApiClient
 import com.example.appmuabandocu.data.District
 import com.example.appmuabandocu.data.Province
-import com.example.appmuabandocu.data.User
+import com.example.appmuabandocu.model.User
 import com.example.appmuabandocu.data.Ward
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

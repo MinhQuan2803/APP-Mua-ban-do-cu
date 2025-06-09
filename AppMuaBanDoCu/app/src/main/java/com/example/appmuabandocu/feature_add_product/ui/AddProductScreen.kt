@@ -37,7 +37,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
 import com.example.appmuabandocu.ui.theme.Blue_text

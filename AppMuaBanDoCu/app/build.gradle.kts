@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -107,6 +108,13 @@ dependencies {
     implementation(libs.gms.play.services.auth) // Example for Auth
     implementation(libs.play.services.location)
 
+    // Room Database - Để lưu trữ dữ liệu offline
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+    // WorkManager - để đồng bộ dữ liệu khi có kết nối
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
-
+    // Gson - để chuyển đổi List<String> trong Room
+    implementation("com.google.code.gson:gson:2.10.1")
 }

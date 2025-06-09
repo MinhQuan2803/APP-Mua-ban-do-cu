@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
-import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.feature_home.formatPrice
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
@@ -51,8 +51,11 @@ fun FavoriteScreen(
         // Only collect favorites if user is logged in
         val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
 
-        val favoriteProducts = viewModel.productList.filter { product ->
-            favoriteProductIds.contains(product.id)
+        // Sửa lại cách lọc sản phẩm yêu thích
+        val favoriteProducts = remember(viewModel.productList, favoriteProductIds) {
+            viewModel.productList.filter { product ->
+                favoriteProductIds.contains(product.id)
+            }
         }
 
         Column(

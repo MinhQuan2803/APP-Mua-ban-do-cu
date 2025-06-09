@@ -61,7 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
-import com.example.appmuabandocu.data.Product
+import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel

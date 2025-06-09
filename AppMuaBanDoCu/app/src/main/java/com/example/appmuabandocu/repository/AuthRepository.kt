@@ -1,7 +1,7 @@
 package com.example.appmuabandocu.repository
 
 import androidx.core.net.toUri
-import com.example.appmuabandocu.data.User
+import com.example.appmuabandocu.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest

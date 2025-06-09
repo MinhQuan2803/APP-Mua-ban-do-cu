@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appmuabandocu.data.User
+import com.example.appmuabandocu.model.User
 import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
