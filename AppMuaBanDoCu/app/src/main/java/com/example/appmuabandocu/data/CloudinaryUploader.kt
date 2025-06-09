@@ -26,7 +26,7 @@ suspend fun uploadImageToCloudinary(context: Context, uri: Uri): String? {
                 .build()
 
             val request = Request.Builder()
-                .url("https://api.cloudinary.com/v1_1/dfqyan1zp/image/upload") // Thay bằng cloud name thật
+                .url("https://api.cloudinary.com/v1_1/drd9duful/image/upload") // Thay bằng cloud name thật
                 .post(requestBody)
                 .build()
 

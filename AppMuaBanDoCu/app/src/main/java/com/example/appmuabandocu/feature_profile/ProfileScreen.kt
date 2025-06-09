@@ -1,7 +1,6 @@
-package com.example.appmuabandocu.feature_profile.ui
+package com.example.appmuabandocu.feature_profile
 
-import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -19,18 +18,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.viewmodel.ProfileViewModel
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+
 @Composable
-fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Unit,navController: NavController) {
+fun ProfileScreen(
+    auth: FirebaseAuth,
+    onSignOut: () -> Unit,
+    navController: NavController,
+    profileViewModel: ProfileViewModel = viewModel()
+) {
     val context = LocalContext.current
     val user = auth.currentUser
+    val userData by profileViewModel.userData.collectAsState()
+    val avatarUrl by profileViewModel.avatarUrl.collectAsState()
+
+    LaunchedEffect(key1 = user) {
+        if (user == null) {
+            navController.navigate("login_screen") {
+                popUpTo("profile_screen") { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -54,9 +68,10 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (user == null) {
-            navController.navigate("login_screen")
-        } else {
+        // Sử dụng LaunchedEffect để điều hướng một lần khi user == null
+
+
+        if (user != null) {
             // Hiển thị giao diện khi đã đăng nhập
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -64,14 +79,23 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(user.photoUrl),
-                    contentDescription = "Ảnh đại diện",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                if (avatarUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = avatarUrl.replace("http://", "https://"),
+                        contentDescription = "Ảnh đại diện",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.LightGray)
+                            .size(80.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -79,7 +103,7 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
                     Text(
                         text = user.displayName ?: "Người dùng",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = Bold
                     )
                     Text(
                         text = user.email ?: "",
@@ -95,7 +119,7 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
                 modifier = Modifier.fillMaxWidth()
             ) {
                 ProfileOption("Thông tin cá nhân") { navController.navigate("profile_detail")}
-                ProfileOption("Quản lý bài viết") { navController.navigate("profile_manage_screen") }
+                ProfileOption("Quản lý bài viết") { navController.navigate("manage_product_screen") }
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -113,7 +137,15 @@ fun ProfileScreen(auth: FirebaseAuth, onSignIn: () -> Unit, onSignOut: () -> Uni
 
                 }
             }
+
         }
+        else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Blue_text)
+            }
+        }
+
+
     }
 }
 

@@ -1,12 +1,9 @@
-package com.example.appmuabandocu.feature_mxh.ui
+package com.example.appmuabandocu.feature_mxh
 
 import android.content.Intent
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -64,13 +60,12 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
-import com.google.firebase.auth.FirebaseAuth
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -83,16 +78,16 @@ import java.util.Locale
 fun MxhScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: ProductViewModel = viewModel(),
-    searchViewModel: SearchProductViewModel = viewModel()
+    productViewModel: ProductViewModel = viewModel(),
+    searchViewModel: SearchProductViewModel = viewModel(),
 ){
-    val products = viewModel.getVisibleProducts()
+    val products = productViewModel.getVisibleProducts()
     val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isRefreshing by productViewModel.isRefreshing.collectAsState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
-        onRefresh = { viewModel.refreshProducts() }
+        onRefresh = { productViewModel.refreshProducts() }
     )
 
     val sortedSearchResults = searchResults.sortedByDescending { it.timestamp }
@@ -187,7 +182,7 @@ fun MxhScreen(
                             product1 = sortedSearchResults[index],
                             navController = navController,
                             toggleProductVisibility = {
-                                viewModel.toggleProductVisibility(
+                                productViewModel.toggleProductVisibility(
                                     sortedSearchResults[index].id
                                 )
                             }
@@ -237,12 +232,13 @@ fun ProductItemMXH(
         )
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = rememberAsyncImagePainter(product1.userAvatar),
+                AsyncImage(
+                    model = product1.userAvatar.replace("http://", "https://"),
                     contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -287,8 +283,8 @@ fun ProductItemMXH(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .clip(RoundedCornerShape(8.dp)),
-                placeholder = painterResource(id = R.drawable.ic_noicom), // Thêm ảnh placeholder
-                error = painterResource(id = R.drawable.ic_condit), // Thêm ảnh khi có lỗi
+                placeholder = painterResource(id = R.drawable.placeholders_product), // Thêm ảnh placeholder
+                error = painterResource(id = R.drawable.error), // Thêm ảnh khi có lỗi
             )
 
 
@@ -334,7 +330,7 @@ fun ProductItemMXH(
 fun formatPrice(price: String): String {
     return try {
         val number = price.toDouble()
-        val formatter = java.text.NumberFormat.getInstance(java.util.Locale("vi", "VN"))
+        val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
         "${formatter.format(number)}₫"
     } catch (e: NumberFormatException) {
         price // Trả nguyên chuỗi nếu không phải số, ví dụ "Thỏa thuận"

@@ -1,12 +1,9 @@
-package com.example.appmuabandocu.feature_favorite.ui
+package com.example.appmuabandocu.feature_favorite
 
-
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -17,27 +14,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.data.Product
-import com.example.appmuabandocu.feature_home.ui.formatPrice
+import com.example.appmuabandocu.feature_home.formatPrice
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
-import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -47,17 +35,25 @@ fun FavoriteScreen(
     viewModel: ProductViewModel,
     favoriteViewModel: FavoriteViewModel
 ) {
-    val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
-
     val auth = FirebaseAuth.getInstance()
     val user = auth.currentUser
 
-    val favoriteProducts = viewModel.productList.filter { product ->
-        favoriteProductIds.contains(product.id)
+    // Redirect to login if user is not logged in
+    LaunchedEffect(key1 = user) {
+        if (user == null) {
+            navController.navigate("login_screen") {
+                popUpTo("favorite_screen") { inclusive = true }
+            }
+        }
     }
-    if (user == null) {
-        navController.navigate("login_screen")
-    } else {
+
+    if (user != null) {
+        // Only collect favorites if user is logged in
+        val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
+
+        val favoriteProducts = viewModel.productList.filter { product ->
+            favoriteProductIds.contains(product.id)
+        }
 
         Column(
             modifier = Modifier
@@ -80,14 +76,12 @@ fun FavoriteScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (
-                favoriteProducts.isEmpty()
-            ) {
+            if (favoriteProducts.isEmpty()) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    shape = RoundedCornerShape(16.dp), // Bo góc
+                    shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.LightGray)
                 ) {
@@ -109,25 +103,28 @@ fun FavoriteScreen(
                         Text(
                             text = "Không có sản phẩm yêu thích nào",
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = Bold,
                             color = Color.Black
                         )
                     }
                 }
-            }
-            else {
-
+            } else {
                 // Hiển thị sản phẩm yêu thích
                 LazyColumn {
-                    items(favoriteProducts.size) { product ->
+                    items(favoriteProducts.size) { index ->
                         ProductItem(
                             navController = navController,
-                            product = favoriteProducts[product],
+                            product = favoriteProducts[index],
                             viewModel = favoriteViewModel
                         )
                     }
                 }
             }
+        }
+    } else {
+        // Hiển thị màn hình loading trong khi chuyển hướng
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Blue_text)
         }
     }
 }
@@ -145,7 +142,7 @@ fun ProductItem(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                navController.navigate("product_detail/${product.id}")// điều hướng
+                navController.navigate("product_detail/${product.id}")
             },
         shape = RoundedCornerShape(8.dp),
     ) {
@@ -161,8 +158,8 @@ fun ProductItem(
                 modifier = Modifier
                     .size(60.dp)
                     .padding(end = 16.dp),
-                placeholder = painterResource(id = R.drawable.ic_noicom),
-                error = painterResource(id = R.drawable.ic_condit),
+                placeholder = painterResource(id = R.drawable.placeholders_product),
+                error = painterResource(id = R.drawable.error),
             )
 
             Column(modifier = Modifier.weight(1f)) {

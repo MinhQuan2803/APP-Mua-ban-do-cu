@@ -104,6 +104,9 @@ dependencies {
     // Firebase restore
     implementation(libs.google.firebase.firestore.ktx)
 
+    implementation(libs.gms.play.services.auth) // Example for Auth
+    implementation(libs.play.services.location)
+
 
 
 }

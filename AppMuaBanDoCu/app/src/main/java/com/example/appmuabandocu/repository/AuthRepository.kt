@@ -1,12 +1,12 @@
-package com.example.appmuabandocu.feature_auth
+package com.example.appmuabandocu.repository
 
+import androidx.core.net.toUri
+import com.example.appmuabandocu.data.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import androidx.core.net.toUri
-import com.example.appmuabandocu.data.User
 
 class AuthRepository {
     private val auth = FirebaseAuth.getInstance()
@@ -39,6 +39,15 @@ class AuthRepository {
 
     fun isUserLoggedIn(): Boolean {
         return auth.currentUser != null
+    }
+
+    suspend fun isUserRegistered(userId: String): Boolean {
+        return try {
+            val document = userCollection.document(userId).get().await()
+            document.exists()
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun getCurrentUserEmail(): String? {

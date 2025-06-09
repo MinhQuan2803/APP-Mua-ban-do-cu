@@ -1,4 +1,4 @@
-package com.example.appmuabandocu.feature_product.ui
+package com.example.appmuabandocu.feature_product
 
 import android.content.Intent
 import androidx.compose.foundation.Image
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -26,12 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.ui.theme.Blue_text
@@ -44,23 +41,19 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
-import com.example.appmuabandocu.feature_mxh.ui.formatPrice
+import com.example.appmuabandocu.feature_mxh.formatPrice
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.core.net.toUri
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.runtime.*
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntOffset
 import com.example.appmuabandocu.viewmodel.ProductViewModel
-import kotlin.math.roundToInt
+
 @Composable
 fun ProductDetailScreen(
     navController: NavController,

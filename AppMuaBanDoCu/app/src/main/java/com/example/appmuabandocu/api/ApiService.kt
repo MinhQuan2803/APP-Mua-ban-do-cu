@@ -1,9 +1,7 @@
-package com.example.thuchanhapi.api
+package com.example.appmuabandocu.api
 
 import com.example.appmuabandocu.data.District
 import com.example.appmuabandocu.data.Province
-import com.example.appmuabandocu.data.Ward
-import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
 

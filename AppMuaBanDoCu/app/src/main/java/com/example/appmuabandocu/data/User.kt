@@ -11,7 +11,6 @@ data class User(
     val district: String? = null,
     val ward: String? = null,
     val isAdmin: Boolean = false,
-    val createdAt: Long
 ){
     fun toMap(): Map<String, Any> {
         return mapOf(
@@ -21,6 +20,9 @@ data class User(
             "avatarUrl" to avatarUrl,
             "phoneNumber" to (phoneNumber ?: ""),
             "address" to (address ?: ""),
+            "province" to (province ?: ""),
+            "district" to (district ?: ""),
+            "ward" to (ward ?: ""),
         )
     }
 }

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "753588286088",
+    "firebase_url": "https://appmuabandocu-default-rtdb.firebaseio.com",
     "project_id": "appmuabandocu",
     "storage_bucket": "appmuabandocu.firebasestorage.app"
   },
@@ -12,7 +13,36 @@
           "package_name": "com.example.appmuabandocu"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "753588286088-3soof3krkgsmir4b1s143ebil9j2b53g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.appmuabandocu",
+            "certificate_hash": "76a4ae4424ab5cc24b524839abf7be3400a64480"
+          }
+        },
+        {
+          "client_id": "753588286088-94m3lb158hqrkpa5nf7cog80oet1losc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.appmuabandocu",
+            "certificate_hash": "b7c703d66cb1f0ef6fe2a951ed51049df46b4da2"
+          }
+        },
+        {
+          "client_id": "753588286088-hdovqbbtd03svqhrnoupnf89drqsiv07.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.appmuabandocu",
+            "certificate_hash": "e067ebce989ba405590e5f0e1e515ced7c57df28"
+          }
+        },
+        {
+          "client_id": "753588286088-7l8efnfk279ig19foltqfj504err5ig0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCLjPINbyHqsIrfRDl-eFHfiQMcJuTcyNU"
@@ -20,7 +50,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "753588286088-7l8efnfk279ig19foltqfj504err5ig0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

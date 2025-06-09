@@ -30,7 +30,10 @@ import androidx.compose.ui.res.colorResource
 import com.example.appmuabandocu.ui.theme.Black
 
 @Composable
-fun SplashRoleScreen(modifier: Modifier = Modifier, navController: NavController) {
+fun SplashRoleScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
     Box(
         modifier = modifier
             .fillMaxSize()

@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
 fun SplashScreen(modifier: Modifier = Modifier, navController: NavController) {
     LaunchedEffect(Unit) {
         delay(2000) // Chờ 2 giây
-        navController.navigate("login_screen") {
+        navController.navigate("splash_role_screen") {
             popUpTo("splash_screen") { inclusive = true } // Xóa Splash khỏi ngăn xếp
         }
     }

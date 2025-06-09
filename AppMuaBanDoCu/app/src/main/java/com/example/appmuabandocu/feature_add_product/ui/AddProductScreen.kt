@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.*
@@ -36,14 +37,11 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.appmuabandocu.data.District
 import com.example.appmuabandocu.data.Product
-import com.example.appmuabandocu.data.Province
-import com.example.appmuabandocu.data.Ward
 import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
-import com.example.appmuabandocu.feature_product.ui.AddressInput
 import com.example.appmuabandocu.ui.theme.Blue_text
+import com.example.appmuabandocu.viewmodel.AddressViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -73,8 +71,9 @@ fun createImageFile(context: Context): File {
 @Composable
 fun AddProductScreen(
     modifier: Modifier = Modifier,
-    category: String, viewModel:
-    ProductViewModel = viewModel(),
+    category: String,
+    addressViewModel: AddressViewModel = viewModel(),
+    viewModel: ProductViewModel = viewModel(),
     navController: NavController
 ) {
 
@@ -92,14 +91,20 @@ fun AddProductScreen(
     var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
 
-    val provinces by viewModel.provinces.collectAsState()
-    val districts by viewModel.districts.collectAsState()
-    val wards by viewModel.wards.collectAsState()
+    // Biến để lưu danh sách tỉnh, quận, phường
+    val provinces by addressViewModel.provinces.collectAsState()
+    val districts by addressViewModel.districts.collectAsState()
+    val wards by addressViewModel.wards.collectAsState()
 
-    // State cho địa chỉ
-    var selectedProvince by remember { mutableStateOf<Province?>(null) }
-    var selectedDistrict by remember { mutableStateOf<District?>(null) }
-    var selectedWard by remember { mutableStateOf<Ward?>(null) }
+    // Biến để lưu tỉnh, quận, phường đã chọn
+    val selectedProvince by addressViewModel.selectedProvince.collectAsState()
+    val selectedDistrict by addressViewModel.selectedDistrict.collectAsState()
+    val selectedWard by addressViewModel.selectedWard.collectAsState()
+
+    // Biến để quản lý trạng thái dropdown
+    var expandedProvince by remember { mutableStateOf(false) }
+    var expandedDistrict by remember { mutableStateOf(false) }
+    var expandedWard by remember { mutableStateOf(false) }
 
     provinceFB = selectedProvince?.name ?: ""
 
@@ -215,6 +220,11 @@ fun AddProductScreen(
                     Text("+", fontSize = 30.sp, color = Color.Black)
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
             item {
                 Box(
                     modifier = Modifier
@@ -290,33 +300,6 @@ fun AddProductScreen(
         }
 
 
-        AddressInput(
-            provinces = provinces,
-            districts = districts,
-            wards = wards,
-            selectedProvince = selectedProvince,
-            selectedDistrict = selectedDistrict,
-            selectedWard = selectedWard,
-            onProvinceChange = { province ->
-                selectedProvince = province
-                selectedDistrict = null
-                selectedWard = null
-                viewModel.loadDistricts(province.code.toString()) // Gọi hàm khi chọn tỉnh
-            },
-            onDistrictChange = { district ->
-                selectedDistrict = district
-                selectedWard = null
-                viewModel.loadWards(district.code.toString()) // Gọi hàm khi chọn huyện
-            },
-            onWardChange = { ward ->
-                selectedWard = ward
-            },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            loadDistricts = { viewModel.loadDistricts(it) },
-            loadWards = { viewModel.loadWards(it) }
-        )
-
-
         val phoneError = numberUser.isNotEmpty() && !numberUser.matches(Regex("^(0|84)[0-9]{9}$"))
         OutlinedTextField(
             value = numberUser,
@@ -349,6 +332,144 @@ fun AddProductScreen(
                 }
             }
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Tỉnh/Thành phố Dropdown
+        OutlinedTextField(
+            value = selectedProvince?.name ?: "Chọn tỉnh",
+            onValueChange = {},
+            label = { Text("Tỉnh/Thành phố") },
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { expandedProvince = !expandedProvince }) {
+                    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                focusedIndicatorColor = Blue_text,
+                unfocusedIndicatorColor = Blue_text,
+                unfocusedContainerColor = Color.White,
+                unfocusedTextColor = Color.Black
+            ),
+            singleLine = true
+        )
+        DropdownMenu(
+            expanded = expandedProvince,
+            onDismissRequest = { expandedProvince = false }
+        ) {
+            provinces.forEach { province ->
+                DropdownMenuItem(
+                    onClick = {
+                        addressViewModel.selectProvince(province)
+                        expandedProvince = false
+                    },
+                    text = { Text(province.name) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Quận/Huyện Dropdown
+        if (selectedProvince != null) {
+            OutlinedTextField(
+                value = selectedDistrict?.name ?: "Chọn quận/huyện",
+                onValueChange = {},
+                label = { Text("Quận/Huyện") },
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { expandedDistrict = !expandedDistrict }) {
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    focusedIndicatorColor = Blue_text,
+                    unfocusedIndicatorColor = Blue_text,
+                    unfocusedContainerColor = Color.White,
+                    unfocusedTextColor = Color.Black
+                ),
+                singleLine = true
+            )
+            DropdownMenu(
+                expanded = expandedDistrict,
+                onDismissRequest = { expandedDistrict = false }
+            ) {
+                districts.forEach { district ->
+                    DropdownMenuItem(
+                        onClick = {
+                            addressViewModel.selectDistrict(district)
+                            expandedDistrict = false
+                        },
+                        text = { Text(district.name) }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Xã/Phường Dropdown
+        if (selectedDistrict != null) {
+            OutlinedTextField(
+                value = selectedWard?.name ?: "Chọn xã/phường",
+                onValueChange = {},
+                label = { Text("Xã/Phường") },
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { expandedWard = !expandedWard }) {
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    focusedIndicatorColor = Blue_text,
+                    unfocusedIndicatorColor = Blue_text,
+                    unfocusedContainerColor = Color.White,
+                    unfocusedTextColor = Color.Black
+                ),
+                singleLine = true
+            )
+            DropdownMenu(
+                expanded = expandedWard,
+                onDismissRequest = { expandedWard = false }
+            ) {
+                wards.forEach { ward ->
+                    DropdownMenuItem(
+                        onClick = {
+                            addressViewModel.selectWard(ward)
+                            expandedWard = false
+                        },
+                        text = { Text(ward.name) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Thêm trường nhập địa chỉ đường/phố
+            OutlinedTextField(
+                value = addressViewModel.streetAddress.collectAsState().value,
+                onValueChange = { addressViewModel.setStreetAddress(it) },
+                label = { Text("Số nhà, tên đường...") },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    focusedIndicatorColor = Blue_text,
+                    unfocusedIndicatorColor = Blue_text,
+                    unfocusedContainerColor = Color.White,
+                    unfocusedTextColor = Color.Black
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -403,7 +524,6 @@ fun AddProductScreen(
                         uploadImageToCloudinary(context, uri)
                     }
 
-
                     if (urls.isNotEmpty()) {
                         val product = Product(
                             productName = productName,
@@ -424,11 +544,10 @@ fun AddProductScreen(
                         viewModel.postProduct(product)
                         Toast.makeText(context, "Đăng bài viết thành công", Toast.LENGTH_SHORT).show()
 
-// ⏳ Chờ 2 giây rồi mới điều hướng
                         delay(2000)
 
                         navController.navigate("homeNav") {
-                            popUpTo("add_product") { inclusive = true }
+                            popUpTo("homeNav") { inclusive = true }
                         }
                     } else {
                         Toast.makeText(context, "Không thể đăng ảnh nào", Toast.LENGTH_SHORT).show()

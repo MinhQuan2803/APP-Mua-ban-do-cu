@@ -1,0 +1,146 @@
+package com.example.appmuabandocu.viewmodel
+
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.core.net.toUri
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.appmuabandocu.data.User
+import com.example.appmuabandocu.data.uploadImageToCloudinary
+import com.example.appmuabandocu.repository.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
+class ProfileViewModel : ViewModel() {
+    private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val userCollection = firestore.collection("users")
+    private val authRepository = AuthRepository()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _avatarUrl = MutableStateFlow(auth.currentUser?.photoUrl?.toString() ?: "")
+    val avatarUrl: StateFlow<String> = _avatarUrl.asStateFlow()
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message.asStateFlow()
+
+    private val _userData = MutableStateFlow<User?>(null)
+    val userData: StateFlow<User?> = _userData.asStateFlow()
+
+    init {
+        loadUserData()
+    }
+
+    private fun loadUserData() {
+        val userId = auth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                // Use get() and await() to fetch user data from Firestore
+                val documentSnapshot = userCollection.document(userId).get().await()
+
+                // Manually create User object from document data to avoid constructor issues
+                if (documentSnapshot.exists()) {
+                    val data = documentSnapshot.data
+                    if (data != null) {
+                        val user = User(
+                            uid = data["id"] as? String ?: "",
+                            email = data["email"] as? String ?: "",
+                            fullName = data["name"] as? String ?: "",
+                            avatarUrl = data["avatarUrl"] as? String ?: "",
+                            phoneNumber = data["phoneNumber"] as? String,
+                            address = data["address"] as? String,
+                            province = data["province"] as? String,
+                            district = data["district"] as? String,
+                            ward = data["ward"] as? String,
+                        )
+                        _userData.value = user
+                        _avatarUrl.value = user.avatarUrl
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error loading user data", e)
+                _message.value = "Không thể tải thông tin người dùng: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun uploadProfileImage(context: Context, imageUri: Uri) {
+        val userId = auth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                // Upload image to Cloudinary
+                val imageUrl = uploadImageToCloudinary(context, imageUri)
+
+                if (imageUrl != null) {
+                    // Update avatar URL in Firebase Auth
+                    val profileUpdates = UserProfileChangeRequest.Builder()
+                        .setPhotoUri(imageUrl.toUri())
+                        .build()
+
+                    auth.currentUser?.updateProfile(profileUpdates)?.await()
+
+                    // Update avatar URL in Firestore
+                    userCollection.document(userId)
+                        .update("avatarUrl", imageUrl)
+                        .await()
+
+                    // Update local state
+                    _avatarUrl.value = imageUrl
+                    _userData.value = _userData.value?.copy(avatarUrl = imageUrl)
+                    _message.value = "Cập nhật ảnh đại diện thành công"
+                } else {
+                    _message.value = "Không thể tải lên ảnh đại diện"
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error uploading profile image", e)
+                _message.value = "Lỗi: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun clearMessage() {
+        _message.value = null
+    }
+
+    // Add function to update other profile fields if needed
+    fun updateUserProfile(user: User) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                // Update user profile in Firestore and Auth
+                authRepository.updateUserProfile(user)
+
+                // Update local state
+                _userData.value = user
+                _message.value = "Cập nhật thông tin thành công"
+
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error updating profile", e)
+                _message.value = "Lỗi khi cập nhật: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-package com.example.appmuabandocu.feature_home.ui
+package com.example.appmuabandocu.feature_home
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -47,17 +48,16 @@ import coil.compose.AsyncImage
 import com.example.appmuabandocu.data.Product
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
-
-
+import java.text.NumberFormat
+import java.util.Locale
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier,
-               navController: NavController,
-               productViewModel: ProductViewModel = viewModel(),
-               searchViewModel: SearchProductViewModel = viewModel()
-
-
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    productViewModel: ProductViewModel = viewModel(),
+    searchViewModel: SearchProductViewModel = viewModel(),
 ) {
 
     val products = productViewModel.getVisibleProducts()
@@ -176,16 +176,14 @@ fun HomeScreen(modifier: Modifier = Modifier,
                     selectedCategory = if (selectedCategory == "Khác") null else "Khác"
                 }
             }
-
-
-
-
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 if (products.isEmpty()) {
-                    Text("Không có sản phẩm nào")
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Blue_text)
+                    }
                 } else {
                     // Hiển thị danh sách sản phẩm
                     LazyVerticalGrid(
@@ -272,8 +270,8 @@ fun ProductItem(
                 .fillMaxWidth()
                 .height(150.dp)
                 .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
-            placeholder = painterResource(id = R.drawable.ic_noicom),
-            error = painterResource(id = R.drawable.ic_xemay)
+            placeholder = painterResource(id = R.drawable.placeholders_product),
+            error = painterResource(id = R.drawable.error)
         )
 
 
@@ -328,7 +326,7 @@ fun ProductItem(
 fun formatPrice(price: String): String {
     return try {
         val number = price.toDouble()
-        val formatter = java.text.NumberFormat.getInstance(java.util.Locale("vi", "VN"))
+        val formatter = NumberFormat.getInstance(Locale("vi", "VN"))
         "${formatter.format(number)}₫"
     } catch (e: NumberFormatException) {
         price // Trả nguyên chuỗi nếu không phải số, ví dụ "Thỏa thuận"

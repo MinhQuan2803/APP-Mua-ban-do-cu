@@ -1,4 +1,4 @@
-package com.example.appmuabandocu.feature_product.ui
+package com.example.appmuabandocu.feature_product
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

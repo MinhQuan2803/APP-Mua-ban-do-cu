@@ -1,4 +1,4 @@
-package com.example.appmuabandocu.feature_auth
+package com.example.appmuabandocu.viewmodel
 
 import android.content.Context
 import android.widget.Toast
@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.data.User
+import com.example.appmuabandocu.repository.AuthRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -13,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
+import okhttp3.internal.wait
 
 class AuthViewModel: ViewModel() {
     private val authRepository = AuthRepository()
@@ -37,6 +38,15 @@ class AuthViewModel: ViewModel() {
     private val _passwordVisible = MutableStateFlow(false)
     val passwordVisible: StateFlow<Boolean> = _passwordVisible.asStateFlow()
 
+    // Thêm state mới để theo dõi trạng thái đăng ký
+    private val _registerSuccess = MutableStateFlow(false)
+    val registerSuccess: StateFlow<Boolean> = _registerSuccess.asStateFlow()
+
+    // Hàm để reset trạng thái đăng ký sau khi đã điều hướng
+    fun resetRegisterSuccess() {
+        _registerSuccess.value = false
+    }
+
     fun setEmail(email: String) {
         _email.value = email
     }
@@ -51,6 +61,7 @@ class AuthViewModel: ViewModel() {
     fun setPhoneNumber(phoneNumber: String) {
         _phoneNumber.value = phoneNumber
     }
+
 
     fun isUserLoggedIn(): Boolean {
         return authRepository.isUserLoggedIn()
@@ -85,7 +96,7 @@ class AuthViewModel: ViewModel() {
         }
     }
 
-    fun registerWithEmailPassword(context: Context) {
+    fun registerWithEmailPassword(context: Context, address: String, province: String, district: String, ward: String) {
         if (email.value.isEmpty() || password.value.isEmpty() || fullName.value.isEmpty()) {
             Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
             return
@@ -105,11 +116,14 @@ class AuthViewModel: ViewModel() {
                         fullName = fullName.value,
                         email = email.value,
                         phoneNumber = phoneNumber.value,
-                        createdAt = System.currentTimeMillis()
+                        address = address,
+                        province = province,
+                        district = district,
+                        ward = ward,
                     )
-
                     // Lưu vào Firestore và cập nhật displayName
                     authRepository.updateUserProfile(userInfo)
+                    _registerSuccess.value = true
                     Toast.makeText(context, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
@@ -117,6 +131,8 @@ class AuthViewModel: ViewModel() {
             }
         }
     }
+
+
 
     fun getGoogleSignInOptions(context: Context): GoogleSignInOptions {
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
