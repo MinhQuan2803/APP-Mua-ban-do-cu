@@ -1,6 +1,9 @@
 package com.example.appmuabandocu.core.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -35,20 +38,23 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.draw.scale
 
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
-object Home : BottomNavItem("homeNav", Icons.Default.Home, "Trang chủ")
-object HomeMxh : BottomNavItem("home_mxh", Icons.Default.Home, "Dạo chợ")
-object Add : BottomNavItem("category_screen", Icons.Default.Add, "Đăng bán")
-object Favorite : BottomNavItem("favorite_screen", Icons.Default.Favorite, "Yêu thích")
-object Profile : BottomNavItem("profile_screen", Icons.Default.Person, "Cá nhân")
+    object Home : BottomNavItem("homeNav", Icons.Default.Home, "Trang chủ")
+    object HomeMxh : BottomNavItem("home_mxh", Icons.Default.Home, "Dạo chợ")
+    object Add : BottomNavItem("category_screen", Icons.Default.Add, "Đăng bán")
+    object Favorite : BottomNavItem("favorite_screen", Icons.Default.Favorite, "Yêu thích")
+    object Profile : BottomNavItem("profile_screen", Icons.Default.Person, "Cá nhân")
 }
 
 // Routes that should hide the bottom nav
 val routesWithoutBottomNav = listOf(
-"login_screen",
-"register_screen",
-"product_detail"
+    "login_screen",
+    "register_screen",
+    "product_detail"
 )
 
 @Composable
@@ -84,12 +90,19 @@ fun BottomNavigation(
 
     val layoutDirection = LocalLayoutDirection.current
 
+    // Sử dụng animateContentSize để có animation mượt hơn khi kích thước thay đổi
     Scaffold(
         bottomBar = {
             AnimatedVisibility(
-                visible = bottomNavVisible,
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it }
+                visible = shouldShowBottomNav,
+                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
+                    animationSpec = tween(300),
+                    initialOffsetY = { it }
+                ),
+                exit = fadeOut(animationSpec = tween(300)) + slideOutVertically(
+                    animationSpec = tween(300),
+                    targetOffsetY = { it }
+                )
             ) {
                 NavigationBar(
                     containerColor = Color.White,
@@ -101,11 +114,26 @@ fun BottomNavigation(
                         val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
 
                         NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = item.label) },
+                            icon = {
+                                // Thêm animation cho icon
+                                val scale by animateFloatAsState(
+                                    if (selected) 1.2f else 1f,
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessMedium
+                                    )
+                                )
+                                Icon(
+                                    item.icon,
+                                    contentDescription = item.label,
+                                    modifier = Modifier.scale(scale)
+                                )
+                            },
                             label = { Text(item.label) },
                             selected = selected,
                             onClick = {
                                 if (currentDestination?.route != item.route) {
+                                    // Thêm xử lý animation khi chuyển tab
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
                                             saveState = true
@@ -113,6 +141,9 @@ fun BottomNavigation(
                                         launchSingleTop = true
                                         restoreState = true
                                     }
+                                } else {
+                                    // Xử lý khi click vào tab hiện tại
+                                    // Có thể gửi event để scroll lên đầu trang
                                 }
                             }
                         )
@@ -121,12 +152,22 @@ fun BottomNavigation(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(
-            bottom = if (bottomNavVisible) innerPadding.calculateBottomPadding() else 0.dp,
-            top = innerPadding.calculateTopPadding(),
-            start = innerPadding.calculateStartPadding(layoutDirection),
-            end = innerPadding.calculateEndPadding(layoutDirection)
-        )) {
+        // Sử dụng animateContentSize để animation mượt hơn khi padding thay đổi
+        Box(
+            modifier = Modifier
+                .padding(
+                    bottom = if (shouldShowBottomNav) innerPadding.calculateBottomPadding() else 0.dp,
+                    top = innerPadding.calculateTopPadding(),
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    end = innerPadding.calculateEndPadding(layoutDirection)
+                )
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+        ) {
             content()
         }
     }
