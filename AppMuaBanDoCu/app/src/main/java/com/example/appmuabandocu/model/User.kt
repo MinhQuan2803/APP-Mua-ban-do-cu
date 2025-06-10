@@ -14,7 +14,6 @@ data class User(
 ){
     fun toMap(): Map<String, Any> {
         return mapOf(
-            "id" to uid,
             "email" to email,
             "name" to fullName,
             "avatarUrl" to avatarUrl,

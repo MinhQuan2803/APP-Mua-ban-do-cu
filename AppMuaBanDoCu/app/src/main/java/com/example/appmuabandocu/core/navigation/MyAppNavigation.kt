@@ -35,7 +35,9 @@ import com.example.appmuabandocu.feature_profile.ProfileDetailScreen
 import com.example.appmuabandocu.feature_profile.ProfileScreen
 import com.example.appmuabandocu.viewmodel.AuthViewModel
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
+import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
+import com.example.appmuabandocu.viewmodel.ProfileViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.FirebaseAuth
@@ -125,6 +127,24 @@ fun MyAppNavigation(
                 },
                 navController = navController,
             )
+        }
+        composable(Screen.ManageProduct.route) {
+            ManageProductScreen(
+                navController = navController,
+                viewModel = ManageProductViewModel()
+            )
+        }
+        composable(Screen.ProfileDetail.route) {
+            ProfileDetailScreen(
+                navController,
+                auth,
+                profileViewModel = ProfileViewModel()
+            )
+        }
+
+        composable(Screen.ProductDetail.route) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId") ?: ""
+            ProductDetailScreen(navController = navController, id = productId)
         }
 
     }

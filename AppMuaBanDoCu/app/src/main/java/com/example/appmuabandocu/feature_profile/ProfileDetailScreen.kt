@@ -15,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,13 +33,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.model.User
 import com.example.appmuabandocu.viewmodel.ProfileViewModel
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun ProfileDetailScreen(
-    modifier: Modifier = Modifier,
     navController: NavController,
     auth: FirebaseAuth,
     profileViewModel: ProfileViewModel = viewModel()
@@ -51,7 +52,12 @@ fun ProfileDetailScreen(
     val message by profileViewModel.message.collectAsState()
     val userData by profileViewModel.userData.collectAsState()
 
-    // Launch effect to show messages
+    var isEditing by remember { mutableStateOf(false) }
+
+    var fullName by remember(userData) { mutableStateOf(userData?.fullName ?: user?.displayName ?: "") }
+    var phoneNumber by remember(userData) { mutableStateOf(userData?.phoneNumber ?: "") }
+    var address by remember(userData) { mutableStateOf(userData?.address ?: "") }
+
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -59,12 +65,10 @@ fun ProfileDetailScreen(
         }
     }
 
-    // Image picker for avatar
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            // Upload avatar to Cloudinary and update Firebase
             profileViewModel.uploadProfileImage(context, uri)
         }
     }
@@ -103,9 +107,6 @@ fun ProfileDetailScreen(
 
         Spacer(modifier = Modifier.padding(16.dp))
 
-        if (user == null) {
-            navController.navigate("login_screen")
-        } else {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -177,14 +178,14 @@ fun ProfileDetailScreen(
                     ) {
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
-                            value = userData?.fullName ?: user.displayName ?: "",
-                            onValueChange = { },
+                            value = fullName,
+                            onValueChange = { if (isEditing) fullName = it },
                             label = { Text("Tên người dùng", color = Blue_text) },
-                            readOnly = true,
+                            readOnly = !isEditing,
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = Blue_text,
                                 unfocusedBorderColor = Blue_text,
-                                cursorColor = Color.Transparent,
+                                cursorColor = if (isEditing) Blue_text else Color.Transparent,
                                 textColor = Blue_text
                             )
                         )
@@ -193,7 +194,7 @@ fun ProfileDetailScreen(
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
-                            value = userData?.email ?: user.email ?: "",
+                            value = userData?.email ?: user?.email ?: "",
                             onValueChange = { },
                             label = { Text("Email", color = Blue_text) },
                             readOnly = true,
@@ -209,10 +210,10 @@ fun ProfileDetailScreen(
 
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
-                            value = userData?.phoneNumber ?: "",
-                            onValueChange = { },
+                            value = phoneNumber,
+                            onValueChange = { if (isEditing) phoneNumber = it },
                             label = { Text("Số điện thoại", color = Blue_text) },
-                            readOnly = true,
+                            readOnly = !isEditing,
                             colors = TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = Blue_text,
                                 unfocusedBorderColor = Blue_text,
@@ -220,9 +221,53 @@ fun ProfileDetailScreen(
                                 textColor = Blue_text
                             )
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = address,
+                            onValueChange = { if (isEditing) address = it },
+                            label = { Text("Địa chỉ", color = Blue_text) },
+                            readOnly = !isEditing,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Blue_text,
+                                cursorColor = Color.Transparent,
+                                textColor = Blue_text
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Edit button
+                        Button(
+                            onClick = {
+                                if (isEditing) {
+                                    // Save changes
+                                    val updatedUser = userData?.copy(
+                                        fullName = fullName,
+                                        phoneNumber = phoneNumber,
+                                        address = address
+                                    ) ?: User(
+                                        email = user?.email ?: "",
+                                        fullName = fullName,
+                                        phoneNumber = phoneNumber,
+                                        address = address
+                                    )
+                                    profileViewModel.updateUserProfile(updatedUser)
+                                }
+                                isEditing = !isEditing
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = Blue_text
+                            )
+                        ) {
+                            Text(if (isEditing) "Lưu thông tin" else "Chỉnh sửa thông tin")
+                        }
                     }
                 }
             }
-        }
+
     }
 }

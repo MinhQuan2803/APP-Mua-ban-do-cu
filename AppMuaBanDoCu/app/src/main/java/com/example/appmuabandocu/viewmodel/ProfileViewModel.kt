@@ -46,11 +46,8 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-
-                // Use get() and await() to fetch user data from Firestore
                 val documentSnapshot = userCollection.document(userId).get().await()
 
-                // Manually create User object from document data to avoid constructor issues
                 if (documentSnapshot.exists()) {
                     val data = documentSnapshot.data
                     if (data != null) {
@@ -118,18 +115,40 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+
     fun clearMessage() {
         _message.value = null
     }
 
-    // Add function to update other profile fields if needed
     fun updateUserProfile(user: User) {
+        val currentUser = auth.currentUser ?: return
+        val userId = currentUser.uid
+
         viewModelScope.launch {
             try {
                 _isLoading.value = true
 
-                // Update user profile in Firestore and Auth
-                authRepository.updateUserProfile(user)
+                // Update display name in Firebase Auth
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setDisplayName(user.fullName)
+                    .build()
+
+                currentUser.updateProfile(profileUpdates).await()
+
+                // Create map of fields to update in Firestore
+                val updates = mapOf(
+                    "name" to user.fullName,
+                    "phoneNumber" to user.phoneNumber,
+                    "address" to user.address,
+                    "province" to user.province,
+                    "district" to user.district,
+                    "ward" to user.ward
+                )
+
+                // Update in Firestore
+                userCollection.document(userId)
+                    .update(updates)
+                    .await()
 
                 // Update local state
                 _userData.value = user
@@ -143,4 +162,5 @@ class ProfileViewModel : ViewModel() {
             }
         }
     }
+
 }

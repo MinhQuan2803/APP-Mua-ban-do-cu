@@ -119,8 +119,8 @@ fun ProfileScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    ProfileOption("Thông tin cá nhân") { navController.navigate("profile_detail") }
-                    ProfileOption("Quản lý bài viết") { navController.navigate("manage_product_screen") }
+                    ProfileOption("Thông tin cá nhân") { navController.navigate(Screen.ProfileDetail.route) }
+                    ProfileOption("Quản lý bài viết") { navController.navigate(Screen.ManageProduct.route) }
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
