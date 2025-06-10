@@ -1,41 +1,157 @@
-//package com.example.appmuabandocu.core.navigation
-//
-//import ProductViewModel
-//import RegisterMainScreen
-//import android.app.Activity.RESULT_OK
-//import android.widget.Toast
-//import androidx.activity.compose.rememberLauncherForActivityResult
-//import androidx.activity.result.IntentSenderRequest
-//import androidx.activity.result.contract.ActivityResultContracts
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.LaunchedEffect
-//import androidx.compose.runtime.getValue
-//import androidx.compose.runtime.rememberCoroutineScope
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.platform.LocalContext
-//import androidx.lifecycle.compose.collectAsStateWithLifecycle
-//import androidx.lifecycle.viewmodel.compose.viewModel
-//import androidx.navigation.compose.NavHost
-//import androidx.navigation.compose.composable
-//import androidx.navigation.compose.rememberNavController
-//import com.example.appmuabandocu.core.ui.SplashRoleScreen
-//import com.example.appmuabandocu.core.ui.SplashScreen
-//import com.example.appmuabandocu.feature_add_product.ui.AddProductScreen
-//import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
-//import com.example.appmuabandocu.feature_auth.LoginScreen
-//import com.example.appmuabandocu.feature_favorite.FavoriteScreen
-//import com.example.appmuabandocu.feature_home.HomeScreen
-//import com.example.appmuabandocu.feature_product.ProductDetailScreen
-//import com.example.appmuabandocu.feature_profile.ManageProductScreen
-//import com.example.appmuabandocu.feature_profile.ProfileDetailScreen
-//import com.example.appmuabandocu.viewmodel.FavoriteViewModel
-//import com.google.firebase.auth.ktx.auth
-//import com.google.firebase.auth.FirebaseAuth
-//import kotlinx.coroutines.coroutineScope
-//import kotlinx.coroutines.launch
-//
-//@Composable
-//fun MyAppNavigation(modifier: Modifier = Modifier,googleAuthUiClient: GoogleAuthUiClient) {
+package com.example.appmuabandocu.core.navigation
+
+import android.app.Activity.RESULT_OK
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.appmuabandocu.core.navigation.model.Screen
+import com.example.appmuabandocu.core.ui.SplashRoleScreen
+import com.example.appmuabandocu.core.ui.SplashScreen
+import com.example.appmuabandocu.feature_add_product.ui.AddProductScreen
+import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
+import com.example.appmuabandocu.feature_auth.LoginScreen
+import com.example.appmuabandocu.feature_favorite.FavoriteScreen
+import com.example.appmuabandocu.feature_home.HomeScreen
+import com.example.appmuabandocu.feature_mxh.MxhScreen
+import com.example.appmuabandocu.feature_product.ProductDetailScreen
+import com.example.appmuabandocu.feature_profile.ManageProductScreen
+import com.example.appmuabandocu.feature_profile.ProfileDetailScreen
+import com.example.appmuabandocu.feature_profile.ProfileScreen
+import com.example.appmuabandocu.viewmodel.AuthViewModel
+import com.example.appmuabandocu.viewmodel.FavoriteViewModel
+import com.example.appmuabandocu.viewmodel.ProductViewModel
+import com.example.appmuabandocu.viewmodel.SearchProductViewModel
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun MyAppNavigation(
+) {
+
+    val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
+    val authViewModel: AuthViewModel = viewModel()
+    val productViewModel: ProductViewModel = viewModel()
+    val searchViewModel: SearchProductViewModel = viewModel()
+
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+
+    val context = LocalContext.current
+
+
+    NavHost(navController = navController, startDestination = Screen.Splash.route) {
+        composable(Screen.Splash.route) {
+            SplashScreen(onSplashFinished = {
+                navController.navigate(Screen.SplashRole.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            })
+        }
+        composable(Screen.SplashRole.route) {
+            SplashRoleScreen(
+                navController
+            )
+        }
+        composable(Screen.Login.route) {
+            LoginScreen(
+                authViewModel,
+                navController,
+                onLoginSuccess = {
+                    authViewModel.signInWithEmailPassword(context)
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(Screen.HomeMxh.route) {
+            MxhScreen(
+                navController = navController,
+                productViewModel = productViewModel,
+                searchViewModel = searchViewModel
+            )
+        }
+        composable(Screen.Home.route) {
+            HomeScreen(
+                navController = navController
+            )
+        }
+        composable(Screen.AddProduct.route) {
+            AddProductScreen(
+                category = "",
+                navController = navController
+            )
+        }
+        composable(Screen.Category.route) {
+            CategoryScreen(
+                navController = navController,
+                auth = auth // Pass FirebaseAuth instance
+            )
+        }
+        composable(Screen.Favorite.route) {
+            FavoriteScreen(
+                navController = navController,
+                viewModel = ProductViewModel(),
+                favoriteViewModel = FavoriteViewModel(),
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                auth = auth,
+                onSignOut = {
+                    authViewModel.signOut(context)
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Profile.route) { inclusive = true }
+                    }
+                },
+                navController = navController,
+            )
+        }
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //    val navController = rememberNavController()
 //    val auth = FirebaseAuth.getInstance()
 //    val coroutineScope = rememberCoroutineScope()

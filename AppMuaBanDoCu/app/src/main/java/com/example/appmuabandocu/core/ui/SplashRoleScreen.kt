@@ -27,15 +27,15 @@ import androidx.navigation.NavController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import androidx.compose.ui.res.colorResource
+import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.ui.theme.Black
 
 @Composable
 fun SplashRoleScreen(
-    modifier: Modifier = Modifier,
     navController: NavController
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
         Image(
@@ -105,7 +105,7 @@ fun SplashRoleScreen(
                     ),
                     border = BorderStroke(1.dp, Blue_text),
                     shape = ButtonDefaults.outlinedShape,
-                    onClick = { navController.navigate("homeNav") }
+                    onClick = { navController.navigate(Screen.Home.route) }
                 ){
                     Text(text = "Bắt đầu ngay", fontSize = 24.sp,
                         fontWeight = Bold,

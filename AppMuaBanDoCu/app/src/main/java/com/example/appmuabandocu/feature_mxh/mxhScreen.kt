@@ -32,6 +32,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
@@ -61,6 +62,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.core.navigation.BottomNavBar
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.ProductViewModel
@@ -96,8 +98,12 @@ fun MxhScreen(
     LaunchedEffect(products) {
         Log.d("mxhScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
+    Scaffold(
+        bottomBar = { BottomNavBar(navController = navController) }
+    ) { paddingValues ->
+
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.padding(paddingValues)
     ){
         Column(
         ){
@@ -200,6 +206,7 @@ fun MxhScreen(
     }
 
     Spacer(modifier = Modifier.height(200.dp))
+}
 }
 @Composable
 fun ProductItemMXH(

@@ -22,6 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.core.navigation.BottomNavBar
+import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.viewmodel.ProfileViewModel
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
@@ -38,113 +40,117 @@ fun ProfileScreen(
 
     LaunchedEffect(key1 = user) {
         if (user == null) {
-            navController.navigate("login_screen") {
-                popUpTo("homeNav") { inclusive = true }
+            navController.navigate(Screen.Login.route) {
+                popUpTo(Screen.Profile.route) { inclusive = true }
             }
         }
     }
 
+    Scaffold(
+        bottomBar = { BottomNavBar(navController = navController) }
+    ) { paddingValues ->
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.padding(16.dp))
-        Text(
-            text = "Thông tin của bạn ",
-            modifier = Modifier.padding(bottom = 16.dp),
-            fontWeight = Bold,
-            fontSize = 30.sp,
-            color = Blue_text
-        )
-        Divider(
-            color = Blue_text,
-            thickness = 1.dp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (user != null) {
-            // Hiển thị giao diện khi đã đăng nhập
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                if (avatarUrl.isNotEmpty()) {
-                    AsyncImage(
-                        model = avatarUrl.replace("http://", "https://"),
-                        contentDescription = "Ảnh đại diện",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.LightGray)
-                            .size(80.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = user.displayName ?: "Người dùng",
-                        fontSize = 18.sp,
-                        fontWeight = Bold
-                    )
-                    Text(
-                        text = user.email ?: "",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.padding(16.dp))
+            Text(
+                text = "Thông tin của bạn ",
+                modifier = Modifier.padding(bottom = 16.dp),
+                fontWeight = Bold,
+                fontSize = 30.sp,
+                color = Blue_text
+            )
+            Divider(
+                color = Blue_text,
+                thickness = 1.dp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                ProfileOption("Thông tin cá nhân") { navController.navigate("profile_detail")}
-                ProfileOption("Quản lý bài viết") { navController.navigate("manage_product_screen") }
-                Spacer(modifier = Modifier.height(16.dp))
-
+            if (user != null) {
+                // Hiển thị giao diện khi đã đăng nhập
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
-                    Button(
-                        onClick = onSignOut,
-                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mauchinh)),
-                        modifier = Modifier.height(50.dp)
-                            .width(150.dp)
-                    ) {
-                        Text(text = "Đăng xuất", color = Color.Black)
+                    if (avatarUrl.isNotEmpty()) {
+                        AsyncImage(
+                            model = avatarUrl.replace("http://", "https://"),
+                            contentDescription = "Ảnh đại diện",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.LightGray)
+                                .size(80.dp)
+                        )
                     }
 
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = user.displayName ?: "Người dùng",
+                            fontSize = 18.sp,
+                            fontWeight = Bold
+                        )
+                        Text(
+                            text = user.email ?: "",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ProfileOption("Thông tin cá nhân") { navController.navigate("profile_detail") }
+                    ProfileOption("Quản lý bài viết") { navController.navigate("manage_product_screen") }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            onClick = {
+                                onSignOut()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.mauchinh)),
+                            modifier = Modifier.height(50.dp)
+                                .width(150.dp)
+                        ) {
+                            Text(text = "Đăng xuất", color = Color.Black)
+                        }
+
+                    }
+                }
+
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Blue_text)
                 }
             }
 
-        }
-        else {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Blue_text)
-            }
-        }
 
-
+        }
     }
 }
-
 @Composable
 fun ProfileOption(title: String, onClick: () -> Unit) {
     Row(

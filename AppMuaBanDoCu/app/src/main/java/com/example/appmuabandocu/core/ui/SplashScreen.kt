@@ -18,16 +18,14 @@ import com.example.appmuabandocu.ui.theme.*
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(modifier: Modifier = Modifier, navController: NavController) {
-    LaunchedEffect(Unit) {
-        delay(2000) // Chờ 2 giây
-        navController.navigate("splash_role_screen") {
-            popUpTo("splash_screen") { inclusive = true } // Xóa Splash khỏi ngăn xếp
-        }
+fun SplashScreen(onSplashFinished: () -> Unit) {
+    LaunchedEffect(key1 = true) {
+        delay(2000)
+        onSplashFinished()
     }
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
         Image(

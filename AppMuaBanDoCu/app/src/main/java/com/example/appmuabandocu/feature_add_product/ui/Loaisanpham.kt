@@ -33,6 +33,7 @@ fun CategoryScreen(auth: FirebaseAuth, navController: NavController) {
     val context = LocalContext.current
     val user = auth.currentUser
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()

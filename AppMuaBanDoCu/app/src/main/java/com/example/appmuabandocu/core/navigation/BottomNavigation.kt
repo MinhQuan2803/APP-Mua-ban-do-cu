@@ -41,140 +41,91 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.draw.scale
+import com.example.appmuabandocu.core.navigation.model.Screen
 
-sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String, val requiresLogin: Boolean = false) {
-    object Home : BottomNavItem("homeNav", Icons.Default.Home, "Trang chủ")
-    object HomeMxh : BottomNavItem("home_mxh", Icons.Default.Home, "Dạo chợ")
-    object Add : BottomNavItem("category_screen", Icons.Default.Add, "Đăng bán", true)
-    object Favorite : BottomNavItem("favorite_screen", Icons.Default.Favorite, "Yêu thích", true)
-    object Profile : BottomNavItem("profile_screen", Icons.Default.Person, "Cá nhân", true)
+sealed class BottomNavItem(val route: String, val icon: ImageVector, val title: String, val requiresLogin: Boolean = false) {
+    object Home : BottomNavItem(Screen.Home.route, Icons.Default.Home, "Trang chủ")
+    object HomeMxh : BottomNavItem(Screen.HomeMxh.route, Icons.Default.Home, "Dạo chợ")
+    object Add : BottomNavItem(Screen.Category.route, Icons.Default.Add, "Đăng bán", true)
+    object Favorite : BottomNavItem(Screen.Favorite.route, Icons.Default.Favorite, "Yêu thích", true)
+    object Profile : BottomNavItem(Screen.Profile.route, Icons.Default.Person, "Cá nhân", true)
 }
 
-// Routes that should hide the bottom nav
-val routesWithoutBottomNav = listOf(
-    "login_screen",
-    "register_screen",
-    "product_detail"
-)
-
 @Composable
-fun BottomNavigation(
-    navController: NavController,
-    isUserLoggedIn: Boolean = false,
-    onRequireLogin: (String) -> Unit = {},
-    content: @Composable () -> Unit
-) {
+fun BottomNavBar(navController: NavController) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.HomeMxh,
         BottomNavItem.Add,
         BottomNavItem.Favorite,
-        BottomNavItem.Profile
+        BottomNavItem.Profile,
     )
 
-    // Track current route to determine if bottom nav should be visible
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: ""
-
-    // Check if the current route should show bottom navigation
-    val shouldShowBottomNav = remember(currentRoute) {
-        !routesWithoutBottomNav.any { route ->
-            currentRoute.contains(route)
-        }
-    }
-
-    var bottomNavVisible by rememberSaveable { mutableStateOf(shouldShowBottomNav) }
-
-    DisposableEffect(shouldShowBottomNav) {
-        bottomNavVisible = shouldShowBottomNav
-        onDispose { }
-    }
-
-    val layoutDirection = LocalLayoutDirection.current
-
-    // Sử dụng animateContentSize để có animation mượt hơn khi kích thước thay đổi
-    Scaffold(
-        bottomBar = {
-            AnimatedVisibility(
-                visible = shouldShowBottomNav,
-                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
-                    animationSpec = tween(300),
-                    initialOffsetY = { it }
-                ),
-                exit = fadeOut(animationSpec = tween(300)) + slideOutVertically(
-                    animationSpec = tween(300),
-                    targetOffsetY = { it }
+    AnimatedVisibility(
+        visible = true,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    ) {
+        NavigationBar(
+            modifier = Modifier.animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
                 )
-            ) {
-                NavigationBar(
-                    containerColor = Color.White,
-                    tonalElevation = 8.dp
-                ) {
-                    val currentDestination = navBackStackEntry?.destination
-
-                    items.forEach { item ->
-                        val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-
-                        NavigationBarItem(
-                            icon = {
-                                // Thêm animation cho icon
-                                val scale by animateFloatAsState(
-                                    if (selected) 1.2f else 1f,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMedium
-                                    )
-                                )
-                                Icon(
-                                    item.icon,
-                                    contentDescription = item.label,
-                                    modifier = Modifier.scale(scale)
-                                )
-                            },
-                            label = { Text(item.label) },
-                            selected = selected,
-                            onClick = {
-                                if (item.requiresLogin && !isUserLoggedIn) {
-                                    // Nếu tab yêu cầu đăng nhập và người dùng chưa đăng nhập
-                                    // thì chuyển đến màn hình đăng nhập
-                                    onRequireLogin(item.route)
-                                } else if (currentDestination?.route != item.route) {
-                                    // Chuyển đến tab được chọn
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                } else {
-                                    // Xử lý khi click vào tab hiện tại
-                                    // Có thể gửi event để scroll lên đầu trang
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    ) { innerPadding ->
-        // Sử dụng animateContentSize để animation mượt hơn khi padding thay đổi
-        Box(
-            modifier = Modifier
-                .padding(
-                    bottom = if (shouldShowBottomNav) innerPadding.calculateBottomPadding() else 0.dp,
-                    top = innerPadding.calculateTopPadding(),
-                    start = innerPadding.calculateStartPadding(layoutDirection),
-                    end = innerPadding.calculateEndPadding(layoutDirection)
-                )
-                .animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
-                )
+            ),
+            tonalElevation = 8.dp
         ) {
-            content()
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
+
+            items.forEach { item ->
+                val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                val scale by animateFloatAsState(
+                    targetValue = if (selected) 1.2f else 1.0f,
+                    animationSpec = tween(durationMillis = 300)
+                )
+
+                NavigationBarItem(
+                    icon = {
+                        Box(modifier = Modifier.scale(scale)) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.title,
+                                tint = if (selected)
+                                    Color(0xFF2196F3)
+                                else
+                                    Color.Gray.copy(alpha = 0.7f)
+                            )
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = item.title,
+                            color = if (selected)
+                                Color(0xFF2196F3)
+                            else
+                                Color.Gray.copy(alpha = 0.7f),
+                            modifier = Modifier.animateContentSize()
+                        )
+                    },
+                    selected = selected,
+                    onClick = {
+                        if (currentDestination?.route != item.route) {
+                            navController.navigate(item.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }

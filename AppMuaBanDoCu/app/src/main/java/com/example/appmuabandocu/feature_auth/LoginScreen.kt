@@ -45,16 +45,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.viewmodel.AuthViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier = Modifier,
     authViewModel: AuthViewModel = viewModel(),
     navController: NavController,
-    onBack: () -> Unit = {}
+    onLoginSuccess: () -> Unit
     ) {
     val context = LocalContext.current
 
@@ -69,8 +69,8 @@ fun LoginScreen(
     // tự động đăng nhập nếu đã có tài khoản
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            navController.navigate("homeNav") {
-                popUpTo("login_screen") { inclusive = true }
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
             }
         }
     }
@@ -102,7 +102,7 @@ fun LoginScreen(
     }
     else{
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             Image(
                 modifier = Modifier.fillMaxSize(),

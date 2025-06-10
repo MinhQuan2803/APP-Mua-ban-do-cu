@@ -9,14 +9,18 @@ package com.example.appmuabandocu.viewmodel
      import com.google.firebase.database.ValueEventListener
      import kotlinx.coroutines.flow.MutableStateFlow
      import kotlinx.coroutines.flow.StateFlow
+     import kotlinx.coroutines.flow.asStateFlow
 
-     class FavoriteViewModel : ViewModel() {
+class FavoriteViewModel : ViewModel() {
 
          private val _favoriteProductIds = MutableStateFlow<Set<String>>(emptySet())
          val favoriteProductIds: StateFlow<Set<String>> = _favoriteProductIds
 
          private val db = FirebaseDatabase.getInstance().getReference("users")
          private val auth = FirebaseAuth.getInstance()
+
+         private val _isLoading = MutableStateFlow(true)
+         val isLoading = _isLoading.asStateFlow()
 
          private var valueEventListener: ValueEventListener? = null
 
@@ -57,6 +61,8 @@ package com.example.appmuabandocu.viewmodel
          }
 
          private fun loadFavorites(userId: String) {
+
+             _isLoading.value = true
              // Remove any existing listener
              removeValueEventListener()
 
@@ -65,10 +71,12 @@ package com.example.appmuabandocu.viewmodel
                  override fun onDataChange(snapshot: DataSnapshot) {
                      val favorites = snapshot.children.mapNotNull { it.key }.toSet()
                      _favoriteProductIds.value = favorites
+                     _isLoading.value = false
                      Log.d("FavoriteViewModel", "Favorites loaded: $favorites")
                  }
 
                  override fun onCancelled(error: DatabaseError) {
+                     _isLoading.value = false
                      Log.e("FavoriteViewModel", "Error loading favorites: ${error.message}")
                  }
              }
@@ -101,10 +109,6 @@ package com.example.appmuabandocu.viewmodel
                      Log.e("FavoriteViewModel", "Error adding product to favorites: ${it.message}")
                  }
              }
-         }
-
-         fun isFavorite(productId: String): Boolean {
-             return _favoriteProductIds.value.contains(productId)
          }
 
          override fun onCleared() {
