@@ -26,6 +26,7 @@ import com.example.appmuabandocu.core.ui.SplashScreen
 import com.example.appmuabandocu.feature_add_product.ui.AddProductScreen
 import com.example.appmuabandocu.feature_add_product.ui.CategoryScreen
 import com.example.appmuabandocu.feature_auth.LoginScreen
+import com.example.appmuabandocu.feature_auth.RegisterMainScreen
 import com.example.appmuabandocu.feature_favorite.FavoriteScreen
 import com.example.appmuabandocu.feature_home.HomeScreen
 import com.example.appmuabandocu.feature_mxh.MxhScreen
@@ -84,6 +85,13 @@ fun MyAppNavigation(
                 }
             )
         }
+        composable(Screen.Register.route) {
+            RegisterMainScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
+        }
+
         composable(Screen.HomeMxh.route) {
             MxhScreen(
                 navController = navController,

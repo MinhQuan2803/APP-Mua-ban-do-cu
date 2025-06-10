@@ -23,6 +23,7 @@ import com.example.appmuabandocu.ui.theme.Blue_text
 import android.widget.Toast
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.viewmodel.AuthViewModel
 import com.example.appmuabandocu.viewmodel.AddressViewModel
 import kotlinx.coroutines.delay
@@ -70,8 +71,8 @@ fun RegisterMainScreen(
     LaunchedEffect(registerSuccess) {
         if (registerSuccess) {
             delay(1000)
-            navController.navigate("login_screen") {
-                popUpTo("register_screen") {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(Screen.Register.route) {
                     inclusive = true
                 }
             }
@@ -366,7 +367,11 @@ fun RegisterMainScreen(
                 Text(text = "Đăng ký")
             }
 
-            TextButton(onClick = { navController.navigate("login_screen") }) {
+            TextButton(onClick = { navController.navigate(Screen.Login.route){
+                popUpTo(Screen.Register.route) {
+                    inclusive = true
+                }
+            } }) {
                 Text(text = "Đã có tài khoản? Đăng nhập ngay")
             }
         }

@@ -167,7 +167,7 @@ fun LoginScreen(
                     )
 
                     TextButton(
-                        onClick = { navController.navigate("homeNav") },
+                        onClick = { navController.navigate(Screen.Register.route) },
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text(text = "Quên mật khẩu", fontSize = 16.sp, color = Blue_text)
@@ -188,7 +188,7 @@ fun LoginScreen(
                         Text(text = "Đăng nhập")
                     }
 
-                    TextButton(onClick = { navController.navigate("register_screen") }) {
+                    TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
                         Text(text = "Chưa có tài khoản ? Đăng ký ngay")
                     }
 
