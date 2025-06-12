@@ -155,7 +155,7 @@ fun HomeScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = Color(0xFFFFB74D)
                 ),
                 actions = {
                     IconButton(onClick = { /* Xử lý thông báo */ }) {

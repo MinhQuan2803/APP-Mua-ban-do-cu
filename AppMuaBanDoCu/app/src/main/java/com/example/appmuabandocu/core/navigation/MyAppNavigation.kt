@@ -223,7 +223,12 @@ fun MyAppNavigation(
                 viewModel = ManageProductViewModel()
             )
         }
-        composable(Screen.ProfileDetail.route) {
+        composable(Screen.ProfileDetail.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             ProfileDetailScreen(
                 navController,
                 auth,

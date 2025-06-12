@@ -134,4 +134,26 @@ class ManageProductViewModel : ViewModel() {
                 }
         }
     }
+    // Cập nhật trạng thái của sản phẩm (còn hàng, đã bán, ẩn)
+    fun updateProductStatus(product: Product, newStatus: String) {
+        val productId = product.id
+        val updatedProduct = product.copy(status = newStatus)
+
+        if (productId.isNotEmpty()) {
+            isLoading.value = true
+            db.child(productId).setValue(updatedProduct)
+                .addOnSuccessListener {
+                    Log.d("RealtimeDatabase", "Cập nhật trạng thái sản phẩm thành công!")
+                    _message.value = "Đã cập nhật trạng thái sản phẩm thành công"
+                    isLoading.value = false
+                }
+                .addOnFailureListener { e ->
+                    errorMessage.value = "Lỗi cập nhật trạng thái sản phẩm: ${e.message}"
+                    Log.e("RealtimeDatabase", "Lỗi cập nhật trạng thái sản phẩm: ", e)
+                    isLoading.value = false
+                }
+        } else {
+            errorMessage.value = "Không thể cập nhật sản phẩm với ID rỗng"
+        }
+    }
 }

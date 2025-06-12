@@ -50,7 +50,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import com.example.appmuabandocu.ui.theme.Blue_text_Dark
-import com.example.appmuabandocu.ui.theme.Blue_text_Light
 
 @Composable
 fun SplashRoleScreen(
