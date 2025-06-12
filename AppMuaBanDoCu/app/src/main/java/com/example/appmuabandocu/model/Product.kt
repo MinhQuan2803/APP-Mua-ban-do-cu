@@ -5,6 +5,7 @@ import java.util.Date
 data class Product(
     var id: String = "",
     val productName: String = "",
+    val status: String = "",
     val price: String = "",
     val address: String = "",
     val provinceFB: String = "",
