@@ -77,6 +77,7 @@ import com.example.appmuabandocu.ui.theme.Blue_text
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.core.navigation.BottomNavBar
 import com.example.appmuabandocu.model.Product
+import com.example.appmuabandocu.ui.theme.orange
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
@@ -155,7 +156,7 @@ fun HomeScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFB74D)
+                    containerColor = orange
                 ),
                 actions = {
                     IconButton(onClick = { /* Xử lý thông báo */ }) {
@@ -290,6 +291,16 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             contentPadding = PaddingValues(horizontal = 4.dp)
                         ) {
+                            item {
+                                CategoryItemImproved(
+                                    title = "Tất cả",
+                                    imageRes = R.drawable.ic_all,
+                                    isSelected = selectedCategory == null,
+                                    onClick = {
+                                        selectedCategory = null
+                                    }
+                                )
+                            }
                             item {
                                 CategoryItemImproved(
                                     title = "Đồ điện tử",
@@ -428,7 +439,6 @@ fun CategoryItemImproved(
                 contentDescription = title,
                 modifier = Modifier.size(32.dp),
                 contentScale = ContentScale.Fit,
-                colorFilter = if (isSelected) ColorFilter.tint(Blue_text) else null
             )
         }
 
