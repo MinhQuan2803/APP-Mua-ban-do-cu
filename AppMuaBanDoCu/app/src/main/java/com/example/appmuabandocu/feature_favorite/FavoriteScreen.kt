@@ -38,15 +38,14 @@ fun FavoriteScreen(
     navController: NavController,
     viewModel: ProductViewModel,
     favoriteViewModel: FavoriteViewModel,
-    auth: FirebaseAuth = FirebaseAuth.getInstance(),
 ) {
 
-    val user = auth.currentUser
+    val user = FirebaseAuth.getInstance().currentUser
 
     LaunchedEffect(key1 = user) {
         if (user == null) {
             navController.navigate(Screen.Login.route) {
-                popUpTo(Screen.Profile.route) { inclusive = true }
+                popUpTo(Screen.Favorite.route) { inclusive = true }
             }
         }
     }

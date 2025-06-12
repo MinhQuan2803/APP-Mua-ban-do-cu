@@ -46,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -115,7 +116,7 @@ fun HomeScreen(
     var isHeaderVisible by remember { mutableStateOf(true) }
 
     // Lưu trữ vị trí cuộn trước đó để xác định hướng cuộn
-    var previousScrollOffset by remember { mutableStateOf(0) }
+    var previousScrollOffset by remember { mutableIntStateOf(0) }
 
     // NestedScrollConnection để phát hiện hướng cuộn
     val nestedScrollConnection = remember {

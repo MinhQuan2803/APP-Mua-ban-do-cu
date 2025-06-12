@@ -5,6 +5,12 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -45,6 +52,36 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
+private const val THOI_GIAN_CHUYEN_DONG = 500
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.taoHieuUngVao(): EnterTransition {
+    return slideIntoContainer(
+        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+        animationSpec = tween(THOI_GIAN_CHUYEN_DONG)
+    ) + fadeIn(animationSpec = tween(THOI_GIAN_CHUYEN_DONG))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.taoHieuUngRa(): ExitTransition {
+    return slideOutOfContainer(
+        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+        animationSpec = tween(THOI_GIAN_CHUYEN_DONG)
+    ) + fadeOut(animationSpec = tween(THOI_GIAN_CHUYEN_DONG))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.taoHieuUngQuayLai(): EnterTransition {
+    return slideIntoContainer(
+        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+        animationSpec = tween(THOI_GIAN_CHUYEN_DONG)
+    ) + fadeIn(animationSpec = tween(THOI_GIAN_CHUYEN_DONG))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.taoHieuUngThoatQuayLai(): ExitTransition {
+    return slideOutOfContainer(
+        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+        animationSpec = tween(THOI_GIAN_CHUYEN_DONG)
+    ) + fadeOut(animationSpec = tween(THOI_GIAN_CHUYEN_DONG))
+}
+
 @Composable
 fun MyAppNavigation(
 ) {
@@ -61,45 +98,74 @@ fun MyAppNavigation(
 
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
-        composable(Screen.Splash.route) {
+        composable(
+            Screen.Splash.route ,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             SplashScreen(onSplashFinished = {
                 navController.navigate(Screen.SplashRole.route) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             })
         }
-        composable(Screen.SplashRole.route) {
+        composable(
+            Screen.SplashRole.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             SplashRoleScreen(
                 navController
             )
         }
-        composable(Screen.Login.route) {
+        composable(
+            Screen.Login.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             LoginScreen(
                 authViewModel,
                 navController,
-                onLoginSuccess = {
-                    authViewModel.signInWithEmailPassword(context)
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
             )
         }
-        composable(Screen.Register.route) {
+        composable(
+            Screen.Register.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             RegisterMainScreen(
                 navController = navController,
                 authViewModel = authViewModel
             )
         }
 
-        composable(Screen.HomeMxh.route) {
+        composable(
+            Screen.HomeMxh.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             MxhScreen(
                 navController = navController,
                 productViewModel = productViewModel,
                 searchViewModel = searchViewModel
             )
         }
-        composable(Screen.Home.route) {
+        composable(Screen.Home.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             HomeScreen(
                 navController = navController
             )
@@ -110,13 +176,23 @@ fun MyAppNavigation(
                 navController = navController
             )
         }
-        composable(Screen.Category.route) {
+        composable(Screen.Category.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             CategoryScreen(
                 navController = navController,
                 auth = auth // Pass FirebaseAuth instance
             )
         }
-        composable(Screen.Favorite.route) {
+        composable(Screen.Favorite.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             FavoriteScreen(
                 navController = navController,
                 viewModel = ProductViewModel(),
@@ -124,7 +200,12 @@ fun MyAppNavigation(
             )
         }
 
-        composable(Screen.Profile.route) {
+        composable(Screen.Profile.route,
+            enterTransition = { taoHieuUngVao() },
+            exitTransition = { taoHieuUngRa() },
+            popEnterTransition = { taoHieuUngQuayLai() },
+            popExitTransition = { taoHieuUngThoatQuayLai() }
+        ) {
             ProfileScreen(
                 auth = auth,
                 onSignOut = {

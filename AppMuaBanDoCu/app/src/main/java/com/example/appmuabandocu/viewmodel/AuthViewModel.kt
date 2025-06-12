@@ -82,17 +82,16 @@ class AuthViewModel: ViewModel() {
         }
 
         viewModelScope.launch {
-            _isLoggedIn.value = true
+
             try {
+
                 authRepository.signInWithEmailPassword(email.value, password.value)
+                _isLoggedIn.value = true
                 Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
+                _isLoggedIn.value = false
                 Toast.makeText(context, "Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-            finally {
-                _isLoggedIn.value = false
-            }
-
         }
     }
 
@@ -154,8 +153,6 @@ class AuthViewModel: ViewModel() {
                 Toast.makeText(context, "Google sign-in successful", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(context, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            } finally {
-                _isLoggedIn.value = false
             }
         }
     }

@@ -67,14 +67,16 @@ import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.viewmodel.AuthViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel = viewModel(),
     navController: NavController,
-    onLoginSuccess: () -> Unit
     ) {
     val context = LocalContext.current
+
+    val user = FirebaseAuth.getInstance().currentUser
 
     val email by authViewModel.email.collectAsState()
     val password by authViewModel.password.collectAsState()
@@ -84,7 +86,7 @@ fun LoginScreen(
     val googleSignOptions = authViewModel.getGoogleSignInOptions(context)
     val googleSignInClient = GoogleSignIn.getClient(context, googleSignOptions)
 
-    // tự động đăng nhập nếu đã có tài khoản
+
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate(Screen.Home.route) {
@@ -108,17 +110,7 @@ fun LoginScreen(
         }
     }
 
-    if (isLoggedIn) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = Blue_text,
-                modifier = Modifier.size(50.dp)
-            )
-        }
-    } else {
+    if (isLoggedIn == false) {
         // Nền tối giản với màu nhẹ
         Box(
             modifier = Modifier
