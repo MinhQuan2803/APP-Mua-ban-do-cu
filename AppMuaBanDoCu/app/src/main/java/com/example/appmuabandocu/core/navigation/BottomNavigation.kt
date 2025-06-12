@@ -62,6 +62,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.ripple
 import androidx.compose.ui.Alignment
@@ -132,22 +133,21 @@ fun BottomNavBar(navController: NavController) {
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
     ) {
-        Surface(
-            color = Color.White,
+        NavigationBar(
+            containerColor = Color.White,
             tonalElevation = 8.dp,
-            shadowElevation = 8.dp
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items.forEachIndexed { index, item ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+            items.forEachIndexed { index, item ->
+                val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
 
-                    if (index == 2) { // Nút đăng bán ở giữa
+                if (index == 2) { // Add button in the middle
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         FloatingActionButton(
                             onClick = {
                                 if (currentDestination?.route != item.route) {
@@ -167,7 +167,7 @@ fun BottomNavBar(navController: NavController) {
                                 defaultElevation = 6.dp,
                                 pressedElevation = 8.dp
                             ),
-                            modifier = Modifier.size(56.dp)
+                            modifier = Modifier.size(48.dp)
                         ) {
                             Icon(
                                 imageVector = item.icon,
@@ -175,24 +175,23 @@ fun BottomNavBar(navController: NavController) {
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                    } else {
-                        // Các nút điều hướng khác
-                        NavBarItem(
-                            item = item,
-                            selected = selected,
-                            onItemClick = {
-                                if (currentDestination?.route != item.route) {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
+                    }
+                } else {
+                    NavBarItem(
+                        item = item,
+                        selected = selected,
+                        onItemClick = {
+                            if (currentDestination?.route != item.route) {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
                                     }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
