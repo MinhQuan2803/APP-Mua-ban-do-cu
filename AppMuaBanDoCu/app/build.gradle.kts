@@ -117,4 +117,10 @@ dependencies {
 
     // Gson - để chuyển đổi List<String> trong Room
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Để sử dụng Canvas và các hiệu ứng đồ họa nâng cao
+    implementation ("androidx.compose.foundation:foundation:1.8.2")
+
+    // Để sử dụng các hiệu ứng animation
+    implementation ("androidx.compose.animation:animation:1.8.2")
 }
