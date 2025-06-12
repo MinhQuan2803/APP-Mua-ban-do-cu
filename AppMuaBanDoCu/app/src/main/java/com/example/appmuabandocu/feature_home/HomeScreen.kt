@@ -61,6 +61,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -85,7 +86,6 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     navController: NavController,
     productViewModel: ProductViewModel = viewModel(),
     searchViewModel: SearchProductViewModel = viewModel(),
@@ -175,10 +175,15 @@ fun HomeScreen(
             )
         },
         bottomBar = { BottomNavBar(navController = navController) }
-    ) { paddingValues ->
+    ) { innerPadding ->
         Box(
-            modifier = modifier
-                .padding(paddingValues)
+            modifier = Modifier
+                .padding(
+                    bottom = innerPadding.calculateBottomPadding(),
+                    top = innerPadding.calculateTopPadding(),
+                    start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = innerPadding.calculateEndPadding(LocalLayoutDirection.current)
+                )
                 .fillMaxSize()
                 .clickable(
                     indication = null,
