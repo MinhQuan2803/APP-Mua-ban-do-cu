@@ -93,6 +93,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.component.formatRelativeTime
 import com.example.appmuabandocu.core.navigation.BottomNavBar
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.ui.theme.Background_Light
@@ -787,22 +788,3 @@ fun formatPrice(price: String): String {
    }
 }
 
-// Hàm định dạng thời gian tương đối
-fun formatRelativeTime(timestamp: Long): String {
-    val date = Date(timestamp)
-    val now = Date()
-    val diffInMillis = now.time - date.time
-    val diffInMinutes = diffInMillis / (60 * 1000)
-    val diffInHours = diffInMillis / (60 * 60 * 1000)
-    val diffInDays = diffInMillis / (24 * 60 * 60 * 1000)
-
-    return when {
-        diffInMinutes < 60 -> "$diffInMinutes phút trước"
-        diffInHours < 24 -> "$diffInHours giờ trước"
-        diffInDays < 7 -> "$diffInDays ngày trước"
-        else -> {
-            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            formatter.format(date)
-        }
-    }
-}

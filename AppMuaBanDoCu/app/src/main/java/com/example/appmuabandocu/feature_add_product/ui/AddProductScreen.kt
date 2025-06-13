@@ -998,7 +998,7 @@ fun AddProductScreen(
                                     address = address,
                                     provinceFB = provinceFB,
                                     numberUser = numberUser,
-                                    category = category,
+                                    category = selectedCategory,
                                     details = details,
                                     negotiable = negotiable,
                                     freeShip = freeShip,
