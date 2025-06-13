@@ -93,7 +93,7 @@ sealed class BottomNavItem(
         "Dạo chợ"
     )
     object Add : BottomNavItem(
-        Screen.Category.route,
+        Screen.AddProduct.route,
         Icons.Default.Add,
         null,
         "Đăng bán",

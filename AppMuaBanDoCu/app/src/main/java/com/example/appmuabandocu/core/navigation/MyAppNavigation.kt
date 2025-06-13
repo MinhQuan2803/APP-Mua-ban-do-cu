@@ -46,7 +46,6 @@ import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.ProfileViewModel
-import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.coroutineScope
@@ -90,7 +89,6 @@ fun MyAppNavigation(
     val auth = FirebaseAuth.getInstance()
     val authViewModel: AuthViewModel = viewModel()
     val productViewModel: ProductViewModel = viewModel()
-    val searchViewModel: SearchProductViewModel = viewModel()
 
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
@@ -157,7 +155,6 @@ fun MyAppNavigation(
             MxhScreen(
                 navController = navController,
                 productViewModel = productViewModel,
-                searchViewModel = searchViewModel
             )
         }
         composable(Screen.Home.route,

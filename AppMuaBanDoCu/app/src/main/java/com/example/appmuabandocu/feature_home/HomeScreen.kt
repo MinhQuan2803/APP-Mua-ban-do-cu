@@ -80,7 +80,6 @@ import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.ui.theme.orange
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
-import com.example.appmuabandocu.viewmodel.SearchProductViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -90,20 +89,22 @@ import java.util.Locale
 fun HomeScreen(
     navController: NavController,
     productViewModel: ProductViewModel = viewModel(),
-    searchViewModel: SearchProductViewModel = viewModel(),
 ) {
 
-    val products = productViewModel.getVisibleProducts()
+    val products = productViewModel.loadVisibleProducts()
 
-    val searchResults by searchViewModel.searchResults.collectAsState<List<Product>>()
+    val searchResults by productViewModel.searchResults.collectAsState<List<Product>>()
     var query by remember { mutableStateOf("") }
 
     val focusManager = LocalFocusManager.current
 
     var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    // Lọc theo danh mục nếu có
     val filteredProducts = products.filter {
         selectedCategory == null || it.category == selectedCategory
     }
+
 
     // Kết quả cuối cùng cần hiển thị (ưu tiên kết quả tìm kiếm nếu có)
     val displayProducts = if (query.isNotBlank()) searchResults else filteredProducts
@@ -116,10 +117,8 @@ fun HomeScreen(
     // Biến để kiểm soát hiển thị phần đầu
     var isHeaderVisible by remember { mutableStateOf(true) }
 
-    // Lưu trữ vị trí cuộn trước đó để xác định hướng cuộn
     var previousScrollOffset by remember { mutableIntStateOf(0) }
 
-    // NestedScrollConnection để phát hiện hướng cuộn
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -136,6 +135,13 @@ fun HomeScreen(
                 }
 
                 return Offset.Zero
+            }
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                return Offset.Zero // Không tiêu thụ bất kỳ cuộn nào
             }
         }
     }
@@ -237,7 +243,7 @@ fun HomeScreen(
                                     value = query,
                                     onValueChange = {
                                         query = it
-                                        searchViewModel.searchProducts(it)
+                                        productViewModel.searchProducts(it)
                                     },
                                     modifier = Modifier
                                         .weight(1f)
@@ -491,25 +497,39 @@ fun ProductItem(
                     placeholder = painterResource(id = R.drawable.placeholders_product),
                     error = painterResource(id = R.drawable.error)
                 )
-                // Badge trạng thái
-                if (product.status == "Đã bán") {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f))
-                    )
-                    Text(
-                        text = "Đã bán",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .background(
-                                color = Color.Red.copy(alpha = 0.7f),
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+
+                // Trạng thái sản phẩm
+                product.status.let { status ->
+                    val statusColor = when (status) {
+                        "sold" -> Color.Red
+                        "available" -> Color(0xFF4CAF50)
+                        else -> Color.Gray
+                    }
+                    val statusText = when (status) {
+                        "sold" -> "Đã bán"
+                        "available" -> "Còn hàng"
+                        else -> "Đã ẩn"
+                    }
+                    // Badge trạng thái
+                    if (product.status == "sold") {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Gray.copy(alpha = 0.5f))
+                        )
+                        Text(
+                            text = "Đã bán",
+                            color = Blue_text,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .background(
+                                    color = Color.Red.copy(alpha = 0.7f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                 }
 
                 // Nút yêu thích

@@ -37,6 +37,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
@@ -113,6 +114,14 @@ fun AddProductScreen(
         if (selectedDistrict != null) append("${selectedDistrict!!.name}, ")
         if (selectedProvince != null) append(selectedProvince!!.name)
     }
+
+    // Thêm các biến để quản lý dropdown danh mục
+    var selectedCategory by remember { mutableStateOf(category) }
+    var expandedCategory by remember { mutableStateOf(false) }
+
+    // Danh sách các danh mục
+    val categories = listOf("Thiết bị điện tử", "Xe cộ", "Quần áo", "Đồ gia dụng", "Khác")
+
 
 
     val imagePicker = rememberLauncherForActivityResult(
@@ -265,13 +274,39 @@ fun AddProductScreen(
 
 
         OutlinedTextField(
-            value = category,
+            value = selectedCategory,
             onValueChange = { },
             label = { Text("Loại mặt hàng") },
-            singleLine = true,
             readOnly = true,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            trailingIcon = {
+                IconButton(onClick = { expandedCategory = !expandedCategory }) {
+                    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                focusedIndicatorColor = Blue_text,
+                unfocusedIndicatorColor = Blue_text,
+                unfocusedContainerColor = Color.White,
+                unfocusedTextColor = Color.Black
+            )
         )
+
+        DropdownMenu(
+            expanded = expandedCategory,
+            onDismissRequest = { expandedCategory = false }
+        ) {
+            categories.forEach { cat ->
+                DropdownMenuItem(
+                    onClick = {
+                        selectedCategory = cat
+                        expandedCategory = false
+                    },
+                    text = { Text(cat) }
+                )
+            }
+        }
 
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -545,10 +580,6 @@ fun AddProductScreen(
                         Toast.makeText(context, "Đăng bài viết thành công", Toast.LENGTH_SHORT).show()
 
                         delay(2000)
-
-                        navController.navigate("homeNav") {
-                            popUpTo("homeNav") { inclusive = true }
-                        }
                     } else {
                         Toast.makeText(context, "Không thể đăng ảnh nào", Toast.LENGTH_SHORT).show()
                     }

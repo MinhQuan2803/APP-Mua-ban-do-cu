@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Date
+import kotlin.text.category
+import kotlin.text.lowercase
 
 class ProductViewModel : ViewModel() {
 
@@ -42,7 +44,8 @@ class ProductViewModel : ViewModel() {
     private val _productsByCategory = MutableStateFlow<List<Product>>(emptyList())
     val productsByCategory: StateFlow<List<Product>> = _productsByCategory
 
-
+    private val _searchResults = MutableStateFlow<List<Product>>(emptyList())
+    val searchResults: StateFlow<List<Product>> get() = _searchResults
 
 
 
@@ -91,7 +94,8 @@ class ProductViewModel : ViewModel() {
                 id = productId,
                 userId = userId,
                 timestamp = Date().time,
-                inStock = true
+                inStock = true,
+                status = "available" // Mặc định trạng thái là "available"
             )
 
             productRef.setValue(productData)
@@ -123,7 +127,14 @@ class ProductViewModel : ViewModel() {
 
     // Hàm để lấy danh sách sản phẩm (chỉ trả về sản phẩm không bị ẩn)
     fun getVisibleProducts(): List<Product> {
-        return _productList.filter { it.displayed == true }
+        return _productList
+    }
+
+    // Hàm để lấy danh sách sản phẩm theo trạng thái hiển thị
+    fun loadVisibleProducts(): List<Product> {
+        return _productList.filter {
+            it.status == "available" || it.status == "sold"
+        }
     }
 
     // Cập nhật danh sách sản phẩm (ví dụ: gọi từ Firestore)
@@ -141,6 +152,27 @@ class ProductViewModel : ViewModel() {
             _isRefreshing.value = false
         }
     }
+
+    fun searchProducts(query: String) {
+        val keyword = query.trim().lowercase()
+        val filtered = if (keyword.isBlank()) {
+            _productList.filter { product ->
+                product.status == "available" || product.status == "sold"
+            }
+        } else {
+            _productList.filter { product ->
+                // Lọc theo từ khóa và trạng thái
+                (product.status == "available" || product.status == "sold") && (
+                        product.productName?.lowercase()?.contains(keyword) == true ||
+                                product.address?.lowercase()?.contains(keyword) == true ||
+                                product.userName?.lowercase()?.contains(keyword) == true ||
+                                product.category?.lowercase()?.contains(keyword) == true
+                        )
+            }
+        }
+        _searchResults.value = filtered
+    }
+
     fun getProductsByCategory(category: String) {
         val dbRef = FirebaseDatabase.getInstance().getReference("products")
 

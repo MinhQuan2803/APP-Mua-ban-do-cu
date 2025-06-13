@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.appmuabandocu.R
+import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -57,7 +58,7 @@ fun CategoryScreen(auth: FirebaseAuth, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         if (user == null) {
-            navController.navigate("login_screen")
+            navController.navigate(Screen.Login.route)
         } else {
             Spacer(modifier = Modifier.height(16.dp))
 

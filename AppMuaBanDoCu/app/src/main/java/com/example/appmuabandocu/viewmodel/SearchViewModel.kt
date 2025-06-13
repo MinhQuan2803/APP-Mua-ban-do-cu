@@ -16,7 +16,6 @@ class SearchProductViewModel : ViewModel() {
     private val _allProducts = MutableStateFlow<List<Product>>(emptyList())
     val allProducts: StateFlow<List<Product>> get() = _allProducts
 
-
     private val _searchResults = MutableStateFlow<List<Product>>(emptyList())
     val searchResults: StateFlow<List<Product>> get() = _searchResults
 
@@ -55,18 +54,5 @@ class SearchProductViewModel : ViewModel() {
     }
 
 
-    fun searchProducts(query: String) {
-        val keyword = query.trim().lowercase()
-        val filtered = if (keyword.isBlank()) {
-            _allProducts.value
-        } else {
-            _allProducts.value.filter { product ->
-                product.productName?.lowercase()?.contains(keyword) == true ||
-                        product.address?.lowercase()?.contains(keyword) == true ||
-                        product.userName?.lowercase()?.contains(keyword) == true ||
-                        product.category?.lowercase()?.contains(keyword) == true
-            }
-        }
-        _searchResults.value = filtered
-    }
+
 }
