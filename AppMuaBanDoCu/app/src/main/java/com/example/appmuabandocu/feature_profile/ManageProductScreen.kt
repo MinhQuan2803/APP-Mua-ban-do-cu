@@ -124,12 +124,13 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                     )
                 )
             },
+            containerColor = Background_Light,
             floatingActionButton = {
                 if (!isLoading && productList.isEmpty()) {
                     FloatingActionButton(
                         onClick = { /* Điều hướng đến màn hình thêm sản phẩm */ },
                         containerColor = Blue_text,
-                        contentColor = Color.White
+                        contentColor = Color.Red
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Add,
@@ -138,7 +139,7 @@ fun ManageProductScreen(viewModel: ManageProductViewModel, navController: NavCon
                     }
                 }
             },
-            containerColor = Background_Light
+
         ) { paddingValues ->
             Column(
                 modifier = Modifier

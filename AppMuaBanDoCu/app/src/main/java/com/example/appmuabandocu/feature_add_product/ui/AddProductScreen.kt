@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,20 +16,43 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Desk
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -41,6 +65,7 @@ import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.data.uploadImageToCloudinary
 import com.example.appmuabandocu.feature_add_product.CurrencyInputTransformation
+import com.example.appmuabandocu.ui.theme.Background_Light
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.AddressViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
@@ -69,6 +94,7 @@ fun createImageFile(context: Context): File {
     // Trả về đường dẫn file ảnh
     return image
 }
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductScreen(
     modifier: Modifier = Modifier,
@@ -77,6 +103,10 @@ fun AddProductScreen(
     viewModel: ProductViewModel = viewModel(),
     navController: NavController
 ) {
+    val Blue_text = Color(0xFF31ACE6)
+    val orange = Color(0xFFFFB74D)
+    val lightGray = Color(0xFFF5F5F5)
+    val darkGray = Color(0xFF757575)
 
     // Quan sát trạng thái thông báo từ ViewModel
     val message = viewModel.message.collectAsState().value
@@ -102,6 +132,25 @@ fun AddProductScreen(
     val selectedDistrict by addressViewModel.selectedDistrict.collectAsState()
     val selectedWard by addressViewModel.selectedWard.collectAsState()
 
+    // Biến để lưu trạng thái lỗi số điện thoại
+    var phoneError by remember { mutableStateOf(false) }
+
+    // Thêm các biến để quản lý dropdown danh mục
+    var selectedCategory by remember { mutableStateOf(category) }
+    var expandedCategory by remember { mutableStateOf(false) }
+
+    // Danh sách các danh mục
+    val categories = listOf("Thiết bị điện tử", "Xe cộ", "Quần áo", "Đồ gia dụng", "Khác")
+
+    var isPosting by remember { mutableStateOf(false) }
+    val isFormValid = productName.isNotBlank() &&
+            selectedCategory.isNotBlank() &&
+            price.isNotBlank() &&
+            imageUris.isNotEmpty() &&
+            address.isNotBlank() &&
+            numberUser.isNotBlank() &&
+            details.isNotBlank()
+
     // Biến để quản lý trạng thái dropdown
     var expandedProvince by remember { mutableStateOf(false) }
     var expandedDistrict by remember { mutableStateOf(false) }
@@ -115,12 +164,7 @@ fun AddProductScreen(
         if (selectedProvince != null) append(selectedProvince!!.name)
     }
 
-    // Thêm các biến để quản lý dropdown danh mục
-    var selectedCategory by remember { mutableStateOf(category) }
-    var expandedCategory by remember { mutableStateOf(false) }
 
-    // Danh sách các danh mục
-    val categories = listOf("Thiết bị điện tử", "Xe cộ", "Quần áo", "Đồ gia dụng", "Khác")
 
 
 
@@ -179,429 +223,828 @@ fun AddProductScreen(
         }
     }
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Đăng bán mặt hàng",
-            fontSize = 24.sp,
-            color = Blue_text,
-            modifier = Modifier.padding(top = 10.dp)
-        )
-
-
-        Divider(
-            color = Blue_text,
-            thickness = 1.dp,
-            modifier = Modifier.padding(vertical = 5.dp)
-        )
-
-
-        // Hiển thị ảnh sản phẩm đã chọn
-        LazyRow(
-            modifier = Modifier.padding(vertical = 12.dp)
-        ) {
-            items(imageUris) { uri ->
-                Image(
-                    painter = rememberAsyncImagePainter(uri),
-                    contentDescription = "Selected Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .border(2.dp, Color.Gray, RoundedCornerShape(8.dp))
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color.LightGray, RoundedCornerShape(8.dp))
-                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
-                        .clickable { imagePicker.launch("image/*") },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("+", fontSize = 30.sp, color = Color.Black)
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color.LightGray, RoundedCornerShape(8.dp))
-                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
-                        .padding(end = 4.dp)
-                        .clickable {
-                            // Tạo Uri ảnh tạm thời và mở camera
-                            val uri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.provider",
-                                createImageFile(context)
-                            )
-                            cameraImageUri.value = uri
-                            cameraLauncher.launch(uri)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.PhotoCamera,
-                        contentDescription = "Camera",
-                        tint = Color.Black
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Đăng bán sản phẩm",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Blue_text
                     )
-                }
-            }
-        }
-
-
-        // Các trường nhập liệu của sản phẩm
-        OutlinedTextField(
-            value = productName,
-            onValueChange = { productName = it },
-            label = { Text("Tên mặt hàng") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        )
-
-
-        OutlinedTextField(
-            value = selectedCategory,
-            onValueChange = { },
-            label = { Text("Loại mặt hàng") },
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = { expandedCategory = !expandedCategory }) {
-                    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-                }
-            },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                focusedIndicatorColor = Blue_text,
-                unfocusedIndicatorColor = Blue_text,
-                unfocusedContainerColor = Color.White,
-                unfocusedTextColor = Color.Black
-            )
-        )
-
-        DropdownMenu(
-            expanded = expandedCategory,
-            onDismissRequest = { expandedCategory = false }
-        ) {
-            categories.forEach { cat ->
-                DropdownMenuItem(
-                    onClick = {
-                        selectedCategory = cat
-                        expandedCategory = false
-                    },
-                    text = { Text(cat) }
-                )
-            }
-        }
-
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = price,
-                onValueChange = { input ->
-                    if (input.all { it.isDigit() }) {
-                        price = input
-                    }
                 },
-                label = { Text("Giá bán") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                visualTransformation = CurrencyInputTransformation(),
-                modifier = Modifier
-                    .width(220.dp)
-                    .padding(vertical = 8.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Checkbox(
-                checked = negotiable,
-                onCheckedChange = { negotiable = it },
-                colors = CheckboxDefaults.colors(checkedColor = Color.Blue)
-            )
-            Text("Cho trả giá")
-        }
-
-
-        val phoneError = numberUser.isNotEmpty() && !numberUser.matches(Regex("^(0|84)[0-9]{9}$"))
-        OutlinedTextField(
-            value = numberUser,
-            onValueChange = {
-                // Chỉ cho nhập số và giới hạn độ dài
-                if (it.length <= 11 && it.all { char -> char.isDigit() }) {
-                    numberUser = it
-                }
-            },
-            isError = phoneError,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Phone,
-                imeAction = ImeAction.Done
-            ),
-            label = { Text("Số điện thoại") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            supportingText = {
-                AnimatedVisibility(visible = phoneError) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Default.Error,
-                            contentDescription = null,
-                            tint = Color.Red,
-                            modifier = Modifier.size(16.dp)
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            modifier = Modifier.size(35.dp),
+                            contentDescription = "Quay lại",
+                            tint = Blue_text
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Số điện thoại không hợp lệ", color = Color(0xFFFFA726))
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = orange
+                )
+            )
+        },
+        containerColor = Background_Light,
+    ) { paddingValues ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(lightGray)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 100.dp)
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Image,
+                                contentDescription = null,
+                                tint = Blue_text
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Hình ảnh sản phẩm",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = " (${imageUris.size}/10)",
+                                color = darkGray,
+                                fontSize = 14.sp
+                            )
+                        }
+                        if (imageUris.isEmpty()) {
+                            // Hiển thị nút thêm ảnh nếu chưa có ảnh nào
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                                    .background(lightGray, RoundedCornerShape(8.dp))
+                                    .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                                    .clickable { imagePicker.launch("image/*") },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AddPhotoAlternate,
+                                        contentDescription = "Thêm ảnh",
+                                        modifier = Modifier.size(48.dp),
+                                        tint = darkGray
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Thêm ảnh sản phẩm",
+                                        color = darkGray
+                                    )
+                                }
+                            }
+                        } else {
+                            // Hiển thị danh sách ảnh đã chọn
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(imageUris) { uri ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(120.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                    ) {
+                                        Image(
+                                            painter = rememberAsyncImagePainter(uri),
+                                            contentDescription = "Selected Image",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .border(
+                                                    1.dp,
+                                                    Color.LightGray,
+                                                    RoundedCornerShape(8.dp)
+                                                )
+                                        )
+
+                                        // Nút xóa ảnh
+                                        IconButton(
+                                            onClick = {
+                                                imageUris = imageUris.filter { it != uri }
+                                            },
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .size(24.dp)
+                                                .background(
+                                                    Color.Black.copy(alpha = 0.5f),
+                                                    CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Xóa ảnh",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                                // Nút thêm ảnh nếu chưa đủ 10 ảnh
+                                if (imageUris.size < 10) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(120.dp)
+                                                .background(lightGray, RoundedCornerShape(8.dp))
+                                                .border(
+                                                    1.dp,
+                                                    Color.LightGray,
+                                                    RoundedCornerShape(8.dp)
+                                                )
+                                                .clickable { imagePicker.launch("image/*") },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = "Thêm ảnh",
+                                                tint = darkGray,
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Nút chọn ảnh từ thư viện hoặc chụp ảnh
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            // Nút chọn ảnh từ thư viện
+                            OutlinedButton(
+                                onClick = { imagePicker.launch("image/*") },
+                                modifier = Modifier.weight(1f),
+                                border = BorderStroke(1.dp, Blue_text),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = Blue_text
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PhotoLibrary,
+                                    contentDescription = "Thư viện",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Thư viện")
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            // Nút chụp ảnh
+                            OutlinedButton(
+                                onClick = {
+                                    val uri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        createImageFile(context)
+                                    )
+                                    cameraImageUri.value = uri
+                                    cameraLauncher.launch(uri)
+                                },
+                                modifier = Modifier.weight(1f),
+                                border = BorderStroke(1.dp, Blue_text),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = Blue_text
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PhotoCamera,
+                                    contentDescription = "Camera",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Camera")
+                            }
+                        }
+                    }
+                }
+                // Phần thông tin sản phẩm
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = Blue_text
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Thông tin sản phẩm",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        }
+                        // Trường nhập tên sản phẩm
+                        OutlinedTextField(
+                            value = productName,
+                            onValueChange = { productName = it },
+                            label = { Text("Tên sản phẩm") },
+                            placeholder = { Text("Nhập tên sản phẩm") },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedLabelColor = Blue_text
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingBag,
+                                    contentDescription = null,
+                                    tint = darkGray
+                                )
+                            }
+                        )
+                        // Danh mục sản phẩm
+                        ExposedDropdownMenuBox(
+                            expanded = expandedCategory,
+                            onExpandedChange = { expandedCategory = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = selectedCategory,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Danh mục sản phẩm") },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory)
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Category,
+                                        contentDescription = null,
+                                        tint = darkGray
+                                    )
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Blue_text,
+                                    unfocusedBorderColor = Color.LightGray,
+                                    focusedLabelColor = Blue_text
+                                ),
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = expandedCategory,
+                                onDismissRequest = { expandedCategory = false },
+                                modifier = Modifier.background(Color.White)
+                            ) {
+                                categories.forEach { category ->
+                                    DropdownMenuItem(
+                                        text = { Text(category) },
+                                        onClick = {
+                                            selectedCategory = category
+                                            expandedCategory = false
+                                        },
+                                        trailingIcon = {
+                                            if (selectedCategory == category) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    tint = Blue_text
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // Trường nhập giá bán sản phẩm
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = price,
+                                onValueChange = { input ->
+                                    if (input.all { it.isDigit() } || input.isEmpty()) {
+                                        price = input
+                                    }
+                                },
+                                label = { Text("Giá bán") },
+                                placeholder = { Text("Nhập giá bán") },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Blue_text,
+                                    unfocusedBorderColor = Color.LightGray,
+                                    focusedLabelColor = Blue_text
+                                ),
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.MonetizationOn,
+                                        contentDescription = null,
+                                        tint = darkGray
+                                    )
+                                },
+                                trailingIcon = {
+                                    Text(
+                                        text = "VNĐ",
+                                        color = darkGray,
+                                        modifier = Modifier.padding(end = 8.dp)
+                                    )
+                                }
+                            )
+                        }
+
+                        // Trường giá có thể thương lượng
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { negotiable = !negotiable },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = negotiable,
+                                onCheckedChange = { negotiable = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Blue_text,
+                                    uncheckedColor = darkGray
+                                )
+                            )
+                            Text(
+                                text = "Giá có thể thương lượng",
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        // Trường phí ship miễn phí
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { freeShip = !freeShip },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = freeShip,
+                                onCheckedChange = { freeShip = it },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Blue_text,
+                                    uncheckedColor = darkGray
+                                )
+                            )
+                            Text(
+                                text = "Miễn phí vận chuyển",
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        // Trường thông tin chi tiết sản phẩm
+                        OutlinedTextField(
+                            value = details,
+                            onValueChange = { details = it },
+                            label = { Text("Thông tin chi tiết") },
+                            placeholder = { Text("Mô tả chi tiết sản phẩm của bạn ... ") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .padding(vertical = 8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedLabelColor = Blue_text
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Description,
+                                    contentDescription = null,
+                                    tint = darkGray,
+                                )
+                            }
+                        )
+                    }
+                }
+                // Thông tin liên hệ
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Phone,
+                                contentDescription = null,
+                                tint = Blue_text
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Thông tin liên hệ",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        }
+                        // Trường nhập số điện thoại
+                        OutlinedTextField(
+                            value = numberUser,
+                            onValueChange = {
+                                if (it.length <= 11 && it.all { char -> char.isDigit() }) {
+                                    numberUser = it
+                                    phoneError = it.length < 10
+                                }
+                            },
+                            isError = phoneError,
+                            label = { Text("Số điện thoại") },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedLabelColor = Blue_text,
+                                errorBorderColor = Color(0xFFFFA726),
+                                errorLabelColor = Color(0xFFFFA726)
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Phone,
+                                    contentDescription = null,
+                                    tint = if (phoneError) Color(0xFFFFA726) else darkGray
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            supportingText = {
+                                AnimatedVisibility(visible = phoneError) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Error,
+                                            contentDescription = null,
+                                            tint = Color(0xFFFFA726),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            "Số điện thoại không hợp lệ",
+                                            color = Color(0xFFFFA726),
+                                            fontSize = 12.sp
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                        // Tỉnh/Thành phố Dropdown
+                        ExposedDropdownMenuBox(
+                            expanded = expandedProvince,
+                            onExpandedChange = { expandedProvince = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = selectedProvince?.name ?: "Chọn Tỉnh/Thành phố‘",
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Tỉnh/Thành phố") },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedProvince)
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.LocationCity,
+                                        contentDescription = null,
+                                        tint = darkGray
+                                    )
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Blue_text,
+                                    unfocusedBorderColor = Color.LightGray,
+                                    focusedLabelColor = Blue_text
+                                ),
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = expandedProvince,
+                                onDismissRequest = { expandedProvince = false },
+                                modifier = Modifier
+                                    .background(Color.White)
+                                    .heightIn(max = 300.dp)
+                            ) {
+                                provinces.forEach { province ->
+                                    DropdownMenuItem(
+                                        text = { Text(province.name) },
+                                        onClick = {
+                                            addressViewModel.selectProvince(province)
+                                            provinceFB = province.name
+                                            expandedProvince = false
+                                        },
+                                        trailingIcon = {
+                                            if (selectedProvince == province) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    tint = Blue_text
+                                                )
+                                            }
+                                            IconButton(onClick = {
+                                                expandedProvince = !expandedProvince
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ArrowDropDown,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // Quận/Huyện Dropdown
+                        if (selectedProvince != null) {
+                            ExposedDropdownMenuBox(
+                                expanded = expandedDistrict,
+                                onExpandedChange = { expandedDistrict = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = selectedDistrict?.name ?: "Quận/Huyện",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Quận/Huyện") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDistrict)
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationCity,
+                                            contentDescription = null,
+                                            tint = darkGray
+                                        )
+                                    },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = Blue_text,
+                                        unfocusedBorderColor = Color.LightGray,
+                                        focusedLabelColor = Blue_text
+                                    ),
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = expandedDistrict,
+                                    onDismissRequest = { expandedDistrict = false },
+                                    modifier = Modifier
+                                        .background(Color.White)
+                                        .heightIn(max = 300.dp)
+                                ) {
+                                    districts.forEach { district ->
+                                        DropdownMenuItem(
+                                            text = { Text(district.name) },
+                                            onClick = {
+                                                addressViewModel.selectDistrict(district)
+                                                expandedDistrict = false
+                                            },
+                                            trailingIcon = {
+                                                if (selectedDistrict == district) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = null,
+                                                        tint = Blue_text
+                                                    )
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        // Xã/Phường Dropdown
+                        if (selectedDistrict != null) {
+                            ExposedDropdownMenuBox(
+                                expanded = expandedWard,
+                                onExpandedChange = { expandedWard = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = selectedWard?.name ?: "Chọn Xã/Phường",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Xã/Phường") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedWard)
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            tint = darkGray
+                                        )
+                                    },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = Blue_text,
+                                        unfocusedBorderColor = Color.LightGray,
+                                        focusedLabelColor = Blue_text
+                                    ),
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = expandedWard,
+                                    onDismissRequest = { expandedWard = false },
+                                    modifier = Modifier
+                                        .background(Color.White)
+                                        .heightIn(max = 300.dp)
+                                ) {
+                                    wards.forEach { ward ->
+                                        DropdownMenuItem(
+                                            text = { Text(ward.name) },
+                                            onClick = {
+                                                addressViewModel.selectWard(ward)
+                                                expandedWard = false
+                                            },
+                                            trailingIcon = {
+                                                if (selectedWard == ward) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = null,
+                                                        tint = Blue_text
+                                                    )
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                        }
+
+                        // Trường nhập địa chỉ chi tiết
+                        OutlinedTextField(
+                            value = addressViewModel.streetAddress.collectAsState().value,
+                            onValueChange = { addressViewModel.setStreetAddress(it) },
+                            label = { Text("Số nhà, Tên đường, ... ") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Blue_text,
+                                unfocusedBorderColor = Color.LightGray,
+                                focusedLabelColor = Blue_text
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Home,
+                                    contentDescription = null,
+                                    tint = darkGray
+                                )
+                            }
+                        )
                     }
                 }
             }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Tỉnh/Thành phố Dropdown
-        OutlinedTextField(
-            value = selectedProvince?.name ?: "Chọn tỉnh",
-            onValueChange = {},
-            label = { Text("Tỉnh/Thành phố") },
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = { expandedProvince = !expandedProvince }) {
-                    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                focusedIndicatorColor = Blue_text,
-                unfocusedIndicatorColor = Blue_text,
-                unfocusedContainerColor = Color.White,
-                unfocusedTextColor = Color.Black
-            ),
-            singleLine = true
-        )
-        DropdownMenu(
-            expanded = expandedProvince,
-            onDismissRequest = { expandedProvince = false }
-        ) {
-            provinces.forEach { province ->
-                DropdownMenuItem(
+            val coroutineScope = rememberCoroutineScope()
+            // Nút đăng sản phẩm
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .shadow(4.dp)
+                    .padding(16.dp)
+            ) {
+                Button(
                     onClick = {
-                        addressViewModel.selectProvince(province)
-                        expandedProvince = false
+                        if (isPosting) return@Button
+                        if (productName.isEmpty() || price.isEmpty() || address.isEmpty() || numberUser.isEmpty() || details.isEmpty()) {
+                            Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        if (imageUris.isEmpty()) {
+                            // Hiá»ƒn thá»‹ thÃ´ng bÃ¡o lá»—i
+                            return@Button
+                        }
+                        isPosting = true
+                        coroutineScope.launch {
+                            val urls = imageUris.mapNotNull { uri ->
+                                uploadImageToCloudinary(context, uri)
+                            }
+                            if (urls.isNotEmpty()) {
+                                val product = Product(
+                                    productName = productName,
+                                    price = price,
+                                    address = address,
+                                    provinceFB = provinceFB,
+                                    numberUser = numberUser,
+                                    category = category,
+                                    details = details,
+                                    negotiable = negotiable,
+                                    freeShip = freeShip,
+                                    imageUrl = urls[0],
+                                    imageMota = urls.drop(1),
+                                    userId = userId,
+                                    userName = userName,
+                                    userAvatar = userAvatar
+                                )
+                                viewModel.postProduct(product)
+                                Toast.makeText(context, "Đăng bài viết thành công", Toast.LENGTH_SHORT).show()
+                                delay(2000)
+                            } else {
+                                Toast.makeText(context, "Vui lòng chọn ít nhất 1 ảnh", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                            isPosting = false
+                        }
                     },
-                    text = { Text(province.name) }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Quận/Huyện Dropdown
-        if (selectedProvince != null) {
-            OutlinedTextField(
-                value = selectedDistrict?.name ?: "Chọn quận/huyện",
-                onValueChange = {},
-                label = { Text("Quận/Huyện") },
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { expandedDistrict = !expandedDistrict }) {
-                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    focusedIndicatorColor = Blue_text,
-                    unfocusedIndicatorColor = Blue_text,
-                    unfocusedContainerColor = Color.White,
-                    unfocusedTextColor = Color.Black
-                ),
-                singleLine = true
-            )
-            DropdownMenu(
-                expanded = expandedDistrict,
-                onDismissRequest = { expandedDistrict = false }
-            ) {
-                districts.forEach { district ->
-                    DropdownMenuItem(
-                        onClick = {
-                            addressViewModel.selectDistrict(district)
-                            expandedDistrict = false
-                        },
-                        text = { Text(district.name) }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Xã/Phường Dropdown
-        if (selectedDistrict != null) {
-            OutlinedTextField(
-                value = selectedWard?.name ?: "Chọn xã/phường",
-                onValueChange = {},
-                label = { Text("Xã/Phường") },
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { expandedWard = !expandedWard }) {
-                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    focusedIndicatorColor = Blue_text,
-                    unfocusedIndicatorColor = Blue_text,
-                    unfocusedContainerColor = Color.White,
-                    unfocusedTextColor = Color.Black
-                ),
-                singleLine = true
-            )
-            DropdownMenu(
-                expanded = expandedWard,
-                onDismissRequest = { expandedWard = false }
-            ) {
-                wards.forEach { ward ->
-                    DropdownMenuItem(
-                        onClick = {
-                            addressViewModel.selectWard(ward)
-                            expandedWard = false
-                        },
-                        text = { Text(ward.name) }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Thêm trường nhập địa chỉ đường/phố
-            OutlinedTextField(
-                value = addressViewModel.streetAddress.collectAsState().value,
-                onValueChange = { addressViewModel.setStreetAddress(it) },
-                label = { Text("Số nhà, tên đường...") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    focusedIndicatorColor = Blue_text,
-                    unfocusedIndicatorColor = Blue_text,
-                    unfocusedContainerColor = Color.White,
-                    unfocusedTextColor = Color.Black
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = freeShip,
-                onCheckedChange = { freeShip = it },
-                colors = CheckboxDefaults.colors(checkedColor = Color.Blue)
-            )
-            Text("Miễn phí vận chuyển")
-        }
-
-
-        OutlinedTextField(
-            value = details,
-            onValueChange = { details = it },
-            label = { Text("Thông tin chi tiết") },
-            singleLine = false,
-            maxLines = 5,
-            modifier = Modifier.fillMaxWidth().height(150.dp).padding(vertical = 8.dp)
-        )
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        // Button Đăng sản phẩm
-        val coroutineScope = rememberCoroutineScope()
-        var isPosting by remember { mutableStateOf(false) }
-        Button(
-            onClick = {
-                if (isPosting) return@Button
-                // Kiểm tra các trường bắt buộc
-                if (productName.isEmpty() || price.isEmpty() || address.isEmpty() || numberUser.isEmpty() || details.isEmpty()) {
-                    Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-
-
-                if (imageUris.isEmpty()) {
-                    Toast.makeText(context, "Vui lòng chọn ít nhất 1 ảnh", Toast.LENGTH_SHORT)
-                        .show()
-                    return@Button
-                }
-
-
-                isPosting = true
-
-
-                // Coroutine để upload ảnh và gửi sản phẩm
-                coroutineScope.launch {
-                    val urls = imageUris.mapNotNull { uri ->
-                        uploadImageToCloudinary(context, uri)
-                    }
-
-                    if (urls.isNotEmpty()) {
-                        val product = Product(
-                            productName = productName,
-                            price = price,
-                            address = address,
-                            provinceFB = provinceFB,
-                            numberUser = numberUser,
-                            category = category,
-                            details = details,
-                            negotiable = negotiable,
-                            freeShip = freeShip,
-                            imageUrl = urls[0], // ảnh bìa
-                            imageMota = urls.drop(1), // ảnh mô tả
-                            userId = userId,
-                            userName = userName,
-                            userAvatar = userAvatar
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = orange,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.LightGray,
+                        disabledContentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    enabled = isFormValid && !isPosting
+                ) {
+                    if (isPosting) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
                         )
-                        viewModel.postProduct(product)
-                        Toast.makeText(context, "Đăng bài viết thành công", Toast.LENGTH_SHORT).show()
-
-                        delay(2000)
                     } else {
-                        Toast.makeText(context, "Không thể đăng ảnh nào", Toast.LENGTH_SHORT).show()
+                        Text(
+                            text = "Đăng bán",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-                    isPosting = false
                 }
-            },
-            enabled = !isPosting,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isPosting) Color.Gray else Blue_text
-            ),
-            modifier = Modifier.size(width = 150.dp, height = 50.dp)
-        ) {
-            if (isPosting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = Color.White,
-                    strokeWidth = 2.dp
-                )
-            } else {
-                Text("Đăng", fontSize = 20.sp, color = Color.White)
             }
         }
-        Spacer(modifier = Modifier.height(60.dp))
     }
 }

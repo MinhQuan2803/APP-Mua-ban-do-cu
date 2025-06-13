@@ -162,13 +162,13 @@ fun MxhScreen(
                            .fillMaxWidth()
                            .padding(horizontal = 16.dp, vertical = 12.dp)
                    ) {
-
+                       Spacer(modifier = Modifier.height(40.dp))
                        // Tiêu đề
                        Text(
                            text = "Thanh lý nhanh",
                            fontSize = 22.sp,
                            fontWeight = FontWeight.Bold,
-                           color = Color.White
+                           color = Blue_text
                        )
 
                        Spacer(modifier = Modifier.height(12.dp))
