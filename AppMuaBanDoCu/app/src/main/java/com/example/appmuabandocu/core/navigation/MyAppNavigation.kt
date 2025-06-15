@@ -41,6 +41,7 @@ import com.example.appmuabandocu.feature_product.ProductDetailScreen
 import com.example.appmuabandocu.feature_profile.ManageProductScreen
 import com.example.appmuabandocu.feature_profile.ProfileDetailScreen
 import com.example.appmuabandocu.feature_profile.ProfileScreen
+import com.example.appmuabandocu.feature_profile.ProfileUserScreen
 import com.example.appmuabandocu.viewmodel.AuthViewModel
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ManageProductViewModel
@@ -237,6 +238,18 @@ fun MyAppNavigation(
             val productId = backStackEntry.arguments?.getString("productId") ?: ""
             ProductDetailScreen(navController = navController, id = productId)
         }
+
+        composable(
+            Screen.ProfileUser.route,
+        ) {
+            val userId = it.arguments?.getString("userId") ?: ""
+            ProfileUserScreen(
+                navController = navController,
+                userId = userId
+            )
+        }
+
+
 
     }
 

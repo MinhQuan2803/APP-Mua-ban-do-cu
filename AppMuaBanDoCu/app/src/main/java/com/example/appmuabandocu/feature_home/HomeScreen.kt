@@ -492,7 +492,7 @@ fun ProductItem(
                 AsyncImage(
                     model = product.imageUrl.replace("http://", "https://"),
                     contentDescription = product.productName,
-                    modifier = Modifier.fillMaxSize().padding(top = 10.dp),
+                    modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit,
                     placeholder = painterResource(id = R.drawable.placeholders_product),
                     error = painterResource(id = R.drawable.error)

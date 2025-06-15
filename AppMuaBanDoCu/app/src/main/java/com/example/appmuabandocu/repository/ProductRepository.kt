@@ -1,37 +1,52 @@
 package com.example.appmuabandocu.repository
 
-import com.example.appmuabandocu.data.local.dao.ProductDao
-import com.example.appmuabandocu.data.local.entity.ProductEntity
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.utils.NetworkConnectivityObserver
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 /**
- * Repository pattern để xử lý dữ liệu sản phẩm từ cả nguồn cục bộ (Room) và remote (Firebase)
+ * Repository pattern để xử lý dữ liệu sản phẩm từ Firebase Firestore
  */
 class ProductRepository(
-    private val productDao: ProductDao,
     private val firestore: FirebaseFirestore,
     private val networkObserver: NetworkConnectivityObserver
 ) {
     private val productsCollection = firestore.collection("products")
 
+    // Cache để lưu trữ tạm thời các sản phẩm đã lấy
+    private val productsCache = MutableStateFlow<List<Product>>(emptyList())
+
     /**
-     * Lấy tất cả sản phẩm, từ cơ sở dữ liệu cục bộ (ưu tiên) hoặc từ Firestore
+     * Lấy tất cả sản phẩm từ Firestore
      * @return Flow của danh sách sản phẩm
      */
     fun getAllProducts(): Flow<List<Product>> {
-        // Không gọi trực tiếp hàm suspend từ đây nữa
-        // Thay vào đó, chúng ta sẽ chỉ trả về dữ liệu từ Room
-        return productDao.getAllProducts().map { entities ->
-            entities.map { it.toProduct() }
-        }
+        // Thiết lập listener để lắng nghe thay đổi từ Firestore
+        productsCollection
+            .whereEqualTo("displayed", true)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) {
+                    return@addSnapshotListener
+                }
+
+                val products = snapshot.documents.mapNotNull { doc ->
+                    val product = doc.toObject<Product>()
+                    product?.copy(id = doc.id)
+                }
+
+                productsCache.update { products }
+            }
+
+        return productsCache
     }
 
     /**
@@ -40,56 +55,31 @@ class ProductRepository(
      * @return Sản phẩm nếu tìm thấy, null nếu không tìm thấy
      */
     suspend fun getProductById(productId: String): Product? {
-        // Đầu tiên, thử lấy từ cơ sở dữ liệu cục bộ
-        val localProduct = productDao.getProductById(productId)
-
-        // Nếu có kết nối mạng và không tìm thấy sản phẩm cục bộ, thử lấy từ Firebase
-        if (localProduct == null && networkObserver.isNetworkAvailable.first()) {
-            try {
-                val remoteProduct = productsCollection.document(productId).get().await()
-                    .toObject<Product>() // Lấy trực tiếp đối tượng Product từ Firebase
-
-                if (remoteProduct != null) {
-                    // Lưu vào cơ sở dữ liệu cục bộ để sử dụng offline sau này
-                    val productEntity = ProductEntity.fromProduct(remoteProduct, true)
-                    productDao.insertProduct(productEntity)
-                    return remoteProduct
-                }
-            } catch (e: Exception) {
-                // Log exception - có thể fail vì nhiều lý do (timeout, permission, etc)
-                e.printStackTrace()
-            }
+        // Trước tiên, kiểm tra xem sản phẩm có trong cache không
+        val cachedProduct = productsCache.value.find { it.id == productId }
+        if (cachedProduct != null) {
+            return cachedProduct
         }
 
-        return localProduct?.toProduct()
-    }
+        // Nếu không có kết nối mạng, không thể lấy sản phẩm mới
+        if (!networkObserver.isNetworkAvailable.first()) {
+            return null
+        }
 
-    /**
-     * Cập nhật sản phẩm lên cả cơ sở dữ liệu cục bộ và Firebase (nếu có kết nối)
-     */
-    suspend fun updateProduct(product: Product) {
-        // Luôn cập nhật vào cơ sở dữ liệu cục bộ
-        val productEntity = ProductEntity.fromProduct(
-            product.copy(timestamp = Date().time),
-            isSynced = networkObserver.isNetworkAvailable.first()
-        )
+        // Truy vấn Firestore để lấy sản phẩm
+        return try {
+            val productDoc = productsCollection.document(productId).get().await()
+            val product = productDoc.toObject<Product>()
 
-        productDao.updateProduct(productEntity)
-
-        // Nếu có kết nối, cập nhật lên Firebase
-        if (networkObserver.isNetworkAvailable.first()) {
-            try {
-                productsCollection.document(product.id).set(product).await()
-                productDao.markProductAsSynced(product.id)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                // Không đánh dấu sản phẩm là đã đồng bộ, sẽ được đồng bộ lại sau
-            }
+            product?.copy(id = productId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
     /**
-     * Tạo sản phẩm mới và lưu vào cả cơ sở dữ liệu cục bộ và Firebase (nếu có kết nối)
+     * Tạo sản phẩm mới trên Firebase
      */
     suspend fun createProduct(product: Product): String {
         val timestamp = Date().time
@@ -100,106 +90,71 @@ class ProductRepository(
             timestamp = timestamp
         )
 
-        // Luôn lưu vào cơ sở dữ liệu cục bộ trước
-        val productEntity = ProductEntity.fromProduct(
-            newProduct,
-            isSynced = networkObserver.isNetworkAvailable.first()
-        )
-
-        productDao.insertProduct(productEntity)
-
-        // Nếu có kết nối, lưu lên Firebase
-        if (networkObserver.isNetworkAvailable.first()) {
-            try {
-                productsCollection.document(productId).set(newProduct).await()
-                productDao.markProductAsSynced(productId)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                // Không đánh dấu sản phẩm là đã đồng bộ, sẽ được đồng bộ lại sau
-            }
+        try {
+            productsCollection.document(productId).set(newProduct).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e  // Re-throw để người gọi biết đã xảy ra lỗi
         }
 
         return productId
     }
 
     /**
-     * Xóa sản phẩm từ cả cơ sở dữ liệu cục bộ và Firebase (nếu có kết nối)
+     * Cập nhật thông tin sản phẩm
+     */
+    suspend fun updateProduct(product: Product) {
+        if (!networkObserver.isNetworkAvailable.first()) {
+            throw Exception("Không có kết nối mạng")
+        }
+
+        try {
+            productsCollection.document(product.id).set(product).await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e  // Re-throw để người gọi biết đã xảy ra lỗi
+        }
+    }
+
+    /**
+     * Xóa sản phẩm
      */
     suspend fun deleteProduct(productId: String) {
-        // Nếu có kết nối, xóa trên Firebase trước
-        if (networkObserver.isNetworkAvailable.first()) {
-            try {
-                productsCollection.document(productId).delete().await()
-                // Sau đó xóa khỏi cơ sở dữ liệu cục bộ
-                productDao.hardDeleteProduct(productId) // Sửa từ deleteProduct -> hardDeleteProduct
-            } catch (e: Exception) {
-                // Nếu xóa trên Firebase thất bại, đánh dấu là đã xóa nhưng chưa đồng bộ
-                e.printStackTrace()
-                val product = productDao.getProductById(productId)
-                if (product != null) {
-                    productDao.updateProduct(product.copy(isDeleted = true, isSynced = false))
-                }
-            }
-        } else {
-            // Nếu không có kết nối, đánh dấu là đã xóa nhưng chưa đồng bộ
-            val product = productDao.getProductById(productId)
-            if (product != null) {
-                productDao.updateProduct(product.copy(isDeleted = true, isSynced = false))
-            }
-        }
-    }
-
-    /**
-     * Đồng bộ hóa tất cả các thay đổi cục bộ lên Firebase
-     * Được gọi khi phát hiện có kết nối mạng trở lại
-     */
-    suspend fun syncProducts() {
         if (!networkObserver.isNetworkAvailable.first()) {
-            return // Không thực hiện đồng bộ nếu không có kết nối
+            throw Exception("Không có kết nối mạng")
         }
 
-        val unsyncedProducts = productDao.getUnsyncedProducts()
-
-        for (product in unsyncedProducts) {
-            try {
-                if (product.isDeleted) {
-                    // Nếu sản phẩm đã bị đánh dấu xóa cục bộ, xóa trên Firebase
-                    productsCollection.document(product.id).delete().await()
-                    // Sau đó xóa khỏi cơ sở dữ liệu cục bộ
-                    productDao.hardDeleteProduct(product.id) // Sửa từ deleteProduct -> hardDeleteProduct
-                } else {
-                    // Nếu sản phẩm được t���o hoặc cập nhật, đồng bộ lên Firebase
-                    productsCollection.document(product.id).set(product.toProduct()).await()
-                    // Đánh dấu là đã đồng bộ
-                    productDao.markProductAsSynced(product.id)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                // Nếu đồng bộ thất bại, tiếp tục với sản phẩm tiếp theo
-                continue
-            }
+        try {
+            productsCollection.document(productId).delete().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e  // Re-throw để người gọi biết đã xảy ra lỗi
         }
     }
 
     /**
-     * Làm mới dữ liệu từ Firebase nếu có kết nối mạng
+     * Lấy tất cả sản phẩm của một người dùng cụ thể
+     * @param userId ID của người dùng
+     * @return Danh sách sản phẩm của người dùng đó
      */
-    private suspend fun refreshProductsIfOnline() {
-        if (networkObserver.isNetworkAvailable.first()) {
-            try {
-                // Lấy dữ liệu trực tiếp dưới dạng Product từ Firebase
-                val remoteProducts = productsCollection.get().await().documents.mapNotNull {
-                    it.toObject<Product>()?.copy(id = it.id)
-                }
+    suspend fun getProductsByUserId(userId: String): List<Product> {
+        if (!networkObserver.isNetworkAvailable.first()) {
+            throw Exception("Không có kết nối mạng")
+        }
 
-                // Cập nhật cơ sở dữ liệu cục bộ với dữ liệu mới nhất từ Firebase
-                val productEntities = remoteProducts.map {
-                    ProductEntity.fromProduct(it, true)
-                }
-                productDao.insertProducts(productEntities)
-            } catch (e: Exception) {
-                e.printStackTrace()
+        return try {
+            val querySnapshot = productsCollection
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            querySnapshot.documents.mapNotNull { doc ->
+                val product = doc.toObject<Product>()
+                product?.copy(id = doc.id)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 }
