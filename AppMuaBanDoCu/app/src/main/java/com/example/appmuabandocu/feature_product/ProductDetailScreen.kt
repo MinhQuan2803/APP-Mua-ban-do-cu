@@ -65,10 +65,17 @@ import androidx.compose.ui.window.DialogProperties
 import coil.request.ImageRequest
 import com.example.appmuabandocu.component.FeatureInDevelopmentDialog
 import com.example.appmuabandocu.component.formatRelativeTime
+import com.example.appmuabandocu.core.navigation.model.Screen
+import com.example.appmuabandocu.feature_profile.ProfileUserViewModel
 import com.example.appmuabandocu.model.Product
+import com.example.appmuabandocu.repository.ProductRepository
+import com.example.appmuabandocu.repository.UserRepository
 import com.example.appmuabandocu.ui.theme.Background_Light
 import com.example.appmuabandocu.ui.theme.orange
+import com.example.appmuabandocu.utils.NetworkConnectivityObserver
 import com.example.appmuabandocu.viewmodel.ProductViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.collections.plusAssign
 import kotlin.compareTo
 import kotlin.dec
@@ -100,6 +107,28 @@ fun ProductDetailScreen(
             emptyList()
         }
     }
+
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val networkObserver = remember { NetworkConnectivityObserver(context) }
+
+    // Create repositories
+    val userRepository = remember { UserRepository(firestore, auth, networkObserver) }
+    val productRepository = remember { ProductRepository(firestore, networkObserver) }
+
+    val viewModel = remember {
+        ProfileUserViewModel(userRepository, productRepository)
+    }
+
+    val userState by viewModel.user.collectAsState()
+    val productsState by viewModel.userProducts.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(product?.userId) {
+        viewModel.loadUserProfile(product?.userId.toString())
+    }
+
 
     // Dialog thông báo tính năng đang phát triển
     var showFeatureDialog by remember { mutableStateOf(false) }
@@ -240,7 +269,7 @@ fun ProductDetailScreen(
                                         showDialog = true
                                     }
                                 },
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             placeholder = painterResource(id = R.drawable.ic_noicom),
                             error = painterResource(id = R.drawable.ic_xemay)
                         )
@@ -519,9 +548,9 @@ fun ProductDetailScreen(
                                         .background(Color.LightGray),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    if (product.userAvatar.isNotEmpty()) {
+                                    if (userState?.avatarUrl?.isNotEmpty() == true) {
                                         AsyncImage(
-                                            model = product.userAvatar.replace("http://", "https://"),
+                                            model = userState?.avatarUrl?.replace("http://", "https://"),
                                             contentDescription = "User Avatar",
                                             modifier = Modifier.fillMaxSize(),
                                             contentScale = ContentScale.Crop
@@ -542,7 +571,7 @@ fun ProductDetailScreen(
                                     modifier = Modifier.weight(1f)
                                 ) {
                                     Text(
-                                        text = product.userName ?: "người dùng",
+                                        text = userState?.fullName ?: "người dùng",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = Color.Black
@@ -586,8 +615,8 @@ fun ProductDetailScreen(
 
                                 IconButton(
                                     onClick = {
-                                        featureName = "Xem trang cá nhân"
-                                        showFeatureDialog = true
+                                        android.util.Log.d("ProductDetailScreen", "Navigating to user profile with userId: ${product.userId}")
+                                        navController.navigate(Screen.ProfileUser.createRoute(product.userId))
                                     }
                                 ) {
                                     Icon(

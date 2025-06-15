@@ -493,7 +493,7 @@ fun ProductItem(
                     model = product.imageUrl.replace("http://", "https://"),
                     contentDescription = product.productName,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
                     placeholder = painterResource(id = R.drawable.placeholders_product),
                     error = painterResource(id = R.drawable.error)
                 )
