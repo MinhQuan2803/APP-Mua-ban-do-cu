@@ -125,8 +125,15 @@ fun ProductDetailScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
+    // Thêm trạng thái để theo dõi việc tải dữ liệu người dùng
+    var loadingUserData by remember { mutableStateOf(true) }
+
     LaunchedEffect(product?.userId) {
-        viewModel.loadUserProfile(product?.userId.toString())
+        if (product?.userId != null) {
+            loadingUserData = true
+            viewModel.loadUserProfile(product.userId.toString())
+            loadingUserData = false
+        }
     }
 
 
@@ -537,93 +544,91 @@ fun ProductDetailScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Avatar người bán
-                                Box(
-                                    modifier = Modifier
-                                        .size(60.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.LightGray),
-                                    contentAlignment = Alignment.Center
+                            // Hiển thị loading khi đang tải thông tin người dùng
+                            if (loadingUserData || isLoading) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (userState?.avatarUrl?.isNotEmpty() == true) {
-                                        AsyncImage(
-                                            model = userState?.avatarUrl?.replace("http://", "https://"),
-                                            contentDescription = "User Avatar",
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Default.Person,
-                                            contentDescription = "User",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(32.dp)
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = Blue_text,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = userState?.fullName ?: "người dùng",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.Black
+                                        text = "Đang tải thông tin người bán...",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color.Gray
                                     )
-
-                                    Spacer(modifier = Modifier.height(4.dp))
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
+                                }
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Avatar người bán
+                                    Box(
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.LightGray),
+                                        contentAlignment = Alignment.Center
                                     ) {
-//                                        Icon(
-//                                            imageVector = Icons.Default.Star,
-//                                            contentDescription = "Rating",
-//                                            tint = Color(0xFFFFC107),
-//                                            modifier = Modifier.size(16.dp)
-//                                        )
-//
-//                                        Spacer(modifier = Modifier.width(4.dp))
-//
-//                                        Text(
-//                                            text = "4.8",
-//                                            style = MaterialTheme.typography.bodyMedium
-//                                        )
+                                        if (userState?.avatarUrl?.isNotEmpty() == true) {
+                                            AsyncImage(
+                                                model = userState?.avatarUrl?.replace("http://", "https://"),
+                                                contentDescription = "User Avatar",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.Person,
+                                                contentDescription = "User",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                        }
+                                    }
 
-//                                        Spacer(modifier = Modifier.width(8.dp))
-//
-//                                        Text(
-//                                            text = "•",
-//                                            color = Color.Gray
-//                                        )
+                                    Spacer(modifier = Modifier.width(16.dp))
 
-//                                        Spacer(modifier = Modifier.width(8.dp))
-
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
                                         Text(
-                                            text = "Đã bán: 15 sản phẩm",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.Gray
+                                            text = userState?.fullName ?: "người dùng",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.Black
+                                        )
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "Đã đăng ${productsState.size} sản phẩm",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            android.util.Log.d("ProductDetailScreen", "Navigating to user profile with userId: ${product.userId}")
+                                            navController.navigate(Screen.ProfileUser.createRoute(product.userId))
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowRight,
+                                            contentDescription = "View Profile",
+                                            tint = Blue_text
                                         )
                                     }
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        android.util.Log.d("ProductDetailScreen", "Navigating to user profile with userId: ${product.userId}")
-                                        navController.navigate(Screen.ProfileUser.createRoute(product.userId))
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowRight,
-                                        contentDescription = "View Profile",
-                                        tint = Blue_text
-                                    )
                                 }
                             }
                         }
