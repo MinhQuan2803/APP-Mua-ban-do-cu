@@ -1,6 +1,12 @@
 package com.example.appmuabandocu.feature_product
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,6 +57,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.window.DialogProperties
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 
@@ -137,8 +144,9 @@ fun ProductDetailScreen(
                     AsyncImage(
                         model = product.imageUrl.replace("http://", "https://"),
                         contentDescription = "Hình sản phẩm",
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
+                            .padding(top = 10.dp)
                             .fillMaxWidth()
                             .aspectRatio(1.5f)
                             .clickable {
@@ -341,16 +349,26 @@ fun InfoRow(label: String, value: String) {
     Spacer(modifier = Modifier.height(6.dp))
 }
 
+
 @Composable
-fun FullScreenImageDialog(imageUrl: String, onDismiss: () -> Unit) {
+fun FullScreenImageDialog(
+    imageUrl: String,
+    onDismiss: () -> Unit
+) {
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        )
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.85f))
+                .background(Color.Black.copy(alpha = 0.5f)) // mờ nhẹ nền nếu thích
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoom, _ ->
                         scale = (scale * zoom).coerceIn(1f, 5f)
@@ -359,21 +377,32 @@ fun FullScreenImageDialog(imageUrl: String, onDismiss: () -> Unit) {
                 },
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = imageUrl.replace("http://", "https://"),
-                contentDescription = "Ảnh phóng to",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        translationX = offset.x,
-                        translationY = offset.y
-                    )
-                    .clickable { onDismiss() }, // Nhấn để thoát
-                placeholder = painterResource(id = R.drawable.ic_noicom),
-                error = painterResource(id = R.drawable.ic_xemay)
-            )
+            AnimatedVisibility(
+                visible = true,
+                enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
+                exit = scaleOut(animationSpec = tween(300)) + fadeOut()
+            ) {
+                AsyncImage(
+                    model = imageUrl.replace("http://", "https://"),
+                    contentDescription = "Ảnh phóng to",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .aspectRatio(1f)
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            translationX = offset.x,
+                            translationY = offset.y
+                        )
+                        .clip(RoundedCornerShape(16.dp)) // 👈 Bo góc
+                        .background(Color.White)
+                        .clickable { onDismiss() },
+                    placeholder = painterResource(id = R.drawable.ic_noicom),
+                    error = painterResource(id = R.drawable.ic_xemay)
+                )
+            }
         }
     }
 }
+
