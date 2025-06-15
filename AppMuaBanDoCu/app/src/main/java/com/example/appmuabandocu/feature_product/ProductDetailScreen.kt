@@ -132,9 +132,12 @@ fun ProductDetailScreen(
         if (product?.userId != null) {
             loadingUserData = true
             viewModel.loadUserProfile(product.userId.toString())
+            viewModel.loadUserProducts(product.userId.toString())
             loadingUserData = false
         }
     }
+
+    val displayProducts = productsState.filter { it.status == "available" || it.status == "sold" }
 
 
     // Dialog thông báo tính năng đang phát triển
@@ -610,7 +613,7 @@ fun ProductDetailScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = "Đã đăng ${productsState.size} sản phẩm",
+                                                text = "Đã đăng ${displayProducts.size} sản phẩm",
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = Color.Gray
                                             )
