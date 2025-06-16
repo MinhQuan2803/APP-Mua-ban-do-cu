@@ -46,6 +46,8 @@ import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.viewmodel.ProfileViewModel
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.ui.theme.orange
+import com.example.appmuabandocu.viewmodel.FavoriteViewModel
+import com.example.appmuabandocu.viewmodel.ManageProductViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,10 +56,16 @@ fun ProfileScreen(
     auth: FirebaseAuth,
     onSignOut: () -> Unit,
     navController: NavController,
-    profileViewModel: ProfileViewModel = viewModel()
+    profileViewModel: ProfileViewModel,
+    manageProductViewModel: ManageProductViewModel,
+    favoriteViewModel: FavoriteViewModel
 ) {
     val user = auth.currentUser
     val avatarUrl by profileViewModel.avatarUrl.collectAsState()
+
+    val favoriteProductIds = favoriteViewModel.favoriteProductIds.collectAsState().value
+
+    val productList = manageProductViewModel.productList
 
     var showDevelopmentDialog by remember { mutableStateOf(false) }
 
@@ -76,6 +84,8 @@ fun ProfileScreen(
         }
     }
 
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -92,7 +102,9 @@ fun ProfileScreen(
                     titleContentColor = Blue_text
                 ),
                 actions = {
-                    IconButton(onClick = { /* Mở cài đặt */ }) {
+                    IconButton(onClick = {
+                        showDevelopmentDialog = true
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Cài đặt",
@@ -194,21 +206,23 @@ fun ProfileScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                ProfileStat(count = "12", title = "Đã đăng")
+                                val productCount = productList.size
+                                ProfileStat(count = productCount.toString(), title = "Đã đăng")
                                 Divider(
                                     modifier = Modifier
                                         .height(40.dp)
                                         .width(1.dp),
                                     color = Color.LightGray
                                 )
-                                ProfileStat(count = "5", title = "Đã bán")
+                                val soldCount = productList.count { it.status == "sold" }
+                                ProfileStat(count = soldCount.toString(), title = "Đã bán")
                                 Divider(
                                     modifier = Modifier
                                         .height(40.dp)
                                         .width(1.dp),
                                     color = Color.LightGray
                                 )
-                                ProfileStat(count = "8", title = "Yêu thích")
+                                ProfileStat(count = favoriteProductIds.size.toString(), title = "Yêu thích")
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))

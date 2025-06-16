@@ -90,6 +90,9 @@ fun MyAppNavigation(
     val auth = FirebaseAuth.getInstance()
     val authViewModel: AuthViewModel = viewModel()
     val productViewModel: ProductViewModel = viewModel()
+    val favoriteViewModel: FavoriteViewModel = viewModel()
+    val profileViewModel: ProfileViewModel = viewModel()
+    val manageProductViewModel: ManageProductViewModel = viewModel()
 
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
@@ -193,8 +196,8 @@ fun MyAppNavigation(
         ) {
             FavoriteScreen(
                 navController = navController,
-                viewModel = ProductViewModel(),
-                favoriteViewModel = FavoriteViewModel(),
+                viewModel = productViewModel,
+                favoriteViewModel = favoriteViewModel,
             )
         }
 
@@ -213,12 +216,16 @@ fun MyAppNavigation(
                     }
                 },
                 navController = navController,
+                profileViewModel = profileViewModel,
+                manageProductViewModel = manageProductViewModel,
+                favoriteViewModel
+
             )
         }
         composable(Screen.ManageProduct.route) {
             ManageProductScreen(
                 navController = navController,
-                viewModel = ManageProductViewModel()
+                viewModel = manageProductViewModel
             )
         }
         composable(Screen.ProfileDetail.route,
@@ -230,7 +237,7 @@ fun MyAppNavigation(
             ProfileDetailScreen(
                 navController,
                 auth,
-                profileViewModel = ProfileViewModel()
+                profileViewModel = profileViewModel
             )
         }
 

@@ -75,6 +75,7 @@ import androidx.navigation.NavController
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.ui.theme.Blue_text
 import coil.compose.AsyncImage
+import com.example.appmuabandocu.component.FeatureInDevelopmentDialog
 import com.example.appmuabandocu.core.navigation.BottomNavBar
 import com.example.appmuabandocu.model.Product
 import com.example.appmuabandocu.ui.theme.orange
@@ -150,6 +151,15 @@ fun HomeScreen(
     LaunchedEffect(products) {
         Log.d("HomeScreen", "Sản phẩm: ${products.size} sản phẩm")
     }
+
+    var showDevelopmentDialog by remember { mutableStateOf(false) }
+    if (showDevelopmentDialog) {
+        FeatureInDevelopmentDialog(
+            onDismiss = { showDevelopmentDialog = false },
+            featureName = "Tính năng" // Tùy chỉnh tên tính năng
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -165,14 +175,14 @@ fun HomeScreen(
                     containerColor = orange
                 ),
                 actions = {
-                    IconButton(onClick = { /* Xử lý thông báo */ }) {
+                    IconButton(onClick = { showDevelopmentDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Notifications",
                             tint = Blue_text
                         )
                     }
-                    IconButton(onClick = { /* Xử lý tin nhắn */ }) {
+                    IconButton(onClick = { showDevelopmentDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = "Messages",
