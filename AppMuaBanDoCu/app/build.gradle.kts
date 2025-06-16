@@ -64,16 +64,13 @@ dependencies {
     implementation ("com.cloudinary:kotlin-url-gen:1.7.0")
     implementation ("com.google.firebase:firebase-storage-ktx:20.3.0")
     implementation("io.coil-kt:coil-compose:2.2.2")
-    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
-    implementation("androidx.credentials:credentials:1.5.0")
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-    implementation ("androidx.compose.ui:ui:1.5.0")
-    implementation ("androidx.compose.ui:ui-tooling-preview:1.5.0")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation ("androidx.navigation:navigation-compose:2.7.2")
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.googleid)
+    implementation (libs.ui)
+    implementation (libs.ui.tooling.preview)
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
+    implementation (libs.androidx.navigation.compose)
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("androidx.navigation:navigation-compose:2.7.5")
@@ -96,7 +93,7 @@ dependencies {
     implementation ("androidx.compose.material:material-icons-extended:1.5.0")
 
 
-    implementation("androidx.compose.material:material:1.7.8")
+    implementation("androidx.compose.material:material:1.8.2")
 
     //lấy api nè
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
