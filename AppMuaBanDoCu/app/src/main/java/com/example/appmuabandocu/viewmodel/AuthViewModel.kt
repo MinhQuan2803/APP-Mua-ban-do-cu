@@ -77,7 +77,7 @@ class AuthViewModel: ViewModel() {
 
     fun signInWithEmailPassword(context: Context) {
         if (email.value.isEmpty() || password.value.isEmpty()) {
-            Toast.makeText(context, "Email and password cannot be empty", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Email và mật khẩu không được để trống", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -87,10 +87,10 @@ class AuthViewModel: ViewModel() {
 
                 authRepository.signInWithEmailPassword(email.value, password.value)
                 _isLoggedIn.value = true
-                Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 _isLoggedIn.value = false
-                Toast.makeText(context, "Login failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đăng nhập thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -145,14 +145,14 @@ class AuthViewModel: ViewModel() {
             _isLoggedIn.value = true
             try {
                 if (account == null) {
-                    Toast.makeText(context, "Google sign-in failed: Account is null", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Đăng nhập Google thất bại: Tài khoản không hợp lệ", Toast.LENGTH_SHORT).show()
                     throw Exception("Google sign-in failed: Account is null")
                 }
                 val idToken = account.idToken ?: throw Exception("Google sign-in failed: ID token is null")
                 authRepository.signWithGoogle(idToken)
-                Toast.makeText(context, "Google sign-in successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(context, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Đăng nhập Google thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -165,7 +165,7 @@ class AuthViewModel: ViewModel() {
         googleSignInClient.signOut()
 
         _isLoggedIn.value = false
-        Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Đã đăng xuất thành công", Toast.LENGTH_SHORT).show()
     }
 
 

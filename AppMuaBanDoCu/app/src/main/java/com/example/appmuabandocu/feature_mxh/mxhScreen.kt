@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -76,6 +77,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -95,19 +97,24 @@ import coil.compose.AsyncImage
 import com.example.appmuabandocu.R
 import com.example.appmuabandocu.component.formatRelativeTime
 import com.example.appmuabandocu.core.navigation.BottomNavBar
+import com.example.appmuabandocu.feature_profile.ProfileUserViewModel
 import com.example.appmuabandocu.model.Product
+import com.example.appmuabandocu.repository.ProductRepository
+import com.example.appmuabandocu.repository.UserRepository
 import com.example.appmuabandocu.ui.theme.Background_Light
 import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.ui.theme.orange
+import com.example.appmuabandocu.utils.NetworkConnectivityObserver
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 import com.example.appmuabandocu.viewmodel.ProductViewModel
 import com.example.appmuabandocu.viewmodel.SearchProductViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-
+import kotlin.toString
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -116,6 +123,7 @@ fun MxhScreen(
    navController: NavController,
    productViewModel: ProductViewModel = viewModel(),
 ){
+    val context = LocalContext.current
     val products = productViewModel.loadVisibleProducts()
     val searchResults by productViewModel.searchResults.collectAsState()
 
@@ -318,7 +326,35 @@ fun EnhancedProductItemMXH(
    navController: NavController,
 ) {
    val context = LocalContext.current
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val networkObserver = remember { NetworkConnectivityObserver(context) }
 
+    // Create repositories
+    val userRepository = remember { UserRepository(firestore, auth, networkObserver) }
+    val productRepository = remember { ProductRepository(firestore, networkObserver) }
+
+    val viewModel = remember {
+        ProfileUserViewModel(userRepository, productRepository)
+    }
+
+    val userState by viewModel.user.collectAsState()
+    val productsState by viewModel.userProducts.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // Thêm trạng thái để theo dõi việc tải dữ liệu người dùng
+    var loadingUserData by remember { mutableStateOf(true) }
+
+    LaunchedEffect(product.userId) {
+        product.userId.let { userId ->
+            loadingUserData = true
+            viewModel.loadUserProfile(userId)
+            viewModel.loadUserProducts(userId)
+            // loadingUserData should be set to false when loading completes
+            // This should ideally happen in the ViewModel after data is loaded
+        }
+    }
     val favoriteViewModel: FavoriteViewModel = viewModel()
     val favoriteIds = favoriteViewModel.favoriteProductIds.collectAsState()
 
@@ -364,12 +400,11 @@ fun EnhancedProductItemMXH(
                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                ) {
                    AsyncImage(
-                       model = product.userAvatar.replace("http://", "https://"),
+                       model = userState?.avatarUrl?.replace("http://", "https://"),
                        contentDescription = "Avatar",
                        modifier = Modifier.size(40.dp),
                        contentScale = ContentScale.Crop,
-                       placeholder = painterResource(id = R.drawable.placeholders_product),
-                       error = painterResource(id = R.drawable.error)
+                       error = rememberVectorPainter(Icons.Default.Person)
                    )
                }
 
@@ -382,7 +417,7 @@ fun EnhancedProductItemMXH(
                    Text(
                        buildAnnotatedString {
                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Black)) {
-                               append(product.userName)
+                               append(userState?.fullName ?: "")
                            }
                            withStyle(style = SpanStyle(color = Color.DarkGray)) {
                                append(" đã đăng một mặt hàng")

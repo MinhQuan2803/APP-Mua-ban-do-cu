@@ -106,7 +106,7 @@ fun LoginScreen(
                 authViewModel.signInWithGoogle(account, context)
             }
         } catch (e: ApiException) {
-            Toast.makeText(context, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Đăng nhập Google thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -387,4 +387,3 @@ fun LoginScreen(
         }
     }
 }
-
