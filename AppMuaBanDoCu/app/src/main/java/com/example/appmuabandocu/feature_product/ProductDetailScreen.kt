@@ -87,10 +87,10 @@ import kotlin.unaryMinus
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
-    navController: NavController,
-    id: String,
-    viewModel: ProductViewModel = viewModel(),
-    favoriteViewModel: FavoriteViewModel = viewModel()
+navController: NavController,
+id: String,
+viewModel: ProductViewModel = viewModel(),
+favoriteViewModel: FavoriteViewModel = viewModel()
 ) {
     val product = viewModel.productList.find { it.id == id }
     val context = LocalContext.current
@@ -273,6 +273,7 @@ fun ProductDetailScreen(
                             contentDescription = "Hình ảnh sản phẩm",
                             modifier = Modifier
                                 .fillMaxSize()
+                                .padding(top=4.dp)
                                 .clickable {
                                     if (imageUrls.isNotEmpty()) {
                                         selectedImageUrl = imageUrls[currentImageIndex].replace("http://", "https://")
@@ -484,7 +485,7 @@ fun ProductDetailScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            InfoRowImproved("Loại sản phẩm", product.category)
+                            InfoRowImproved("Loại sản phẩm ", product.category)
                             InfoRowImproved("Tình trạng giá", if (product.negotiable) "Có thể thương lượng" else "Không trả giá")
                             InfoRowImproved("Giao hàng", if (product.freeShip) "Miễn phí ship" else "Không có freeship")
 
@@ -496,7 +497,7 @@ fun ProductDetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
                                     contentDescription = "Location",
-                                    tint = Color.Gray,
+                                    tint = Color.Black,
                                     modifier = Modifier.size(16.dp)
                                 )
 
@@ -725,7 +726,7 @@ fun InfoRowImproved(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = Color.Gray,
-            modifier = Modifier.width(120.dp)
+            modifier = Modifier.width(150.dp)
         )
         Text(
             text = value,

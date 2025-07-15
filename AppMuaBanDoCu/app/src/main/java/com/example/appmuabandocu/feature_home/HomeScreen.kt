@@ -529,12 +529,12 @@ fun ProductItem(
                         )
                         Text(
                             text = "Đã bán",
-                            color = Blue_text,
+                            color = Color.White,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .background(
-                                    color = Color.Red.copy(alpha = 0.7f),
+                                    color = Blue_text.copy(alpha = 0.7f),
                                     shape = RoundedCornerShape(4.dp)
                                 )
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -548,18 +548,18 @@ fun ProductItem(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size(36.dp)
-                        .padding(4.dp)
+                        .padding(0.dp)
                         .offset((-10).dp, 10.dp)
                         .background(
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = Blue_text.copy(alpha = 0.7f),
                             shape = CircleShape
                         )
                 ) {
                     Icon(
                         imageVector = if (favoriteIds.value.contains(product.id)) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                         contentDescription = "Favorite",
-                        tint = if (favoriteIds.value.contains(product.id)) Color.Red else Color.Gray,
-                        modifier = Modifier.size(20.dp)
+                        tint = if (favoriteIds.value.contains(product.id)) Color.Red else Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

@@ -62,6 +62,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.appmuabandocu.core.navigation.model.Screen
 import com.example.appmuabandocu.feature_home.formatPrice
+import com.example.appmuabandocu.ui.theme.Blue_text
 import com.example.appmuabandocu.viewmodel.FavoriteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -544,7 +545,7 @@ fun EmptyProductsView() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "KhÃ´ng cÃ³ sáº£n pháº©m nÃ o",
+                text = "Không có sản phẩm nào được đăng",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -712,35 +713,21 @@ fun ProductCard(product: Product, navController: NavController) {
                             .padding(8.dp)
                     ) {
                         Text(
-                            text = "ĐÃ BÁN",
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
+                            text = "Đã bán",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .background(
+                                    color = Blue_text.copy(alpha = 0.7f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
                 }
                 // Favorite button
-                IconButton(
-                    onClick = { favoriteViewModel.toggleFavorite(product.id)  },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
-                ) {
-                    Icon(
-                        imageVector = if (favoriteIds.value.contains(product.id))
-                            Icons.Filled.Favorite else
-                            Icons.Default.FavoriteBorder,
-                        contentDescription = "Yêu thích",
-                        tint = if (favoriteIds.value.contains(product.id))
-                            MaterialTheme.colorScheme.error else
-                            MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                
             }
 
             // Product Info
